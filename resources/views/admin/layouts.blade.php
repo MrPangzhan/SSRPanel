@@ -40,8 +40,7 @@
     <div class="page-header-inner ">
         <!-- BEGIN LOGO -->
         <div class="page-logo">
-            <a href="{{url('/')}}">
-                <img src="/assets/images/logo.png" alt="logo" class="logo-default" /> </a>
+            <a href="{{url('/')}}"> <img src="/assets/images/logo.png" alt="logo" class="logo-default" /> </a>
             <div class="menu-toggler sidebar-toggler">
                 <!-- DOC: Remove the above "hide" to enable the sidebar toggler button on header -->
             </div>
@@ -216,6 +215,27 @@
                         </li>
                     </ul>
                 </li>
+                <li class="nav-item {{in_array(Request::path(), ['marketing/emailList', 'marketing/pushList']) ? 'active open' : ''}}">
+                    <a href="javascript:;" class="nav-link nav-toggle">
+                        <i class="fa fa-send-o"></i>
+                        <span class="title">营销管理</span>
+                        <span class="arrow"></span>
+                    </a>
+                    <ul class="sub-menu">
+                        <li class="nav-item {{in_array(Request::path(), ['marketing/emailList']) ? 'active open' : ''}}">
+                            <a href="{{url('marketing/emailList')}}" class="nav-link ">
+                                <i class="fa fa-inbox"></i>
+                                <span class="title">邮件群发</span>
+                            </a>
+                        </li>
+                        <li class="nav-item {{in_array(Request::path(), ['marketing/pushList']) ? 'active open' : ''}}">
+                            <a href="{{url('marketing/pushList')}}" class="nav-link ">
+                                <i class="fa fa-rss"></i>
+                                <span class="title">消息推送</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
                 <li class="nav-item {{in_array(Request::path(), ['admin/decompile', 'admin/convert', 'admin/import', 'admin/trafficLog', 'admin/analysis', 'admin/subscribeLog', 'emailLog/logList', 'payment/callbackList']) ? 'active open' : ''}}">
                     <a href="javascript:;" class="nav-link nav-toggle">
                         <i class="fa fa-wrench"></i>
@@ -337,6 +357,17 @@
 <!-- BEGIN THEME LAYOUT SCRIPTS -->
 <script src="/assets/layouts/layout4/scripts/layout.min.js" type="text/javascript"></script>
 <!-- END THEME LAYOUT SCRIPTS -->
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-122312249-1"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-122312249-1');
+</script>
+
 </body>
 
 </html>

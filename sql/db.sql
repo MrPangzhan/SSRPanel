@@ -123,8 +123,8 @@ CREATE TABLE `user` (
   `gender` tinyint(4) NOT NULL DEFAULT '1' COMMENT '性别：0-女、1-男',
   `wechat` varchar(30) DEFAULT '' COMMENT '微信',
   `qq` varchar(20) DEFAULT '' COMMENT 'QQ',
-  `usage` tinyint(4) NOT NULL DEFAULT '4' COMMENT '用途：1-手机、2-电脑、3-路由器、4-其他',
-  `pay_way` tinyint(4) NOT NULL DEFAULT '0' COMMENT '付费方式：0-免费、1-月付、2-半年付、3-年付',
+  `usage` VARCHAR(10) NOT NULL DEFAULT '4' COMMENT '用途：1-手机、2-电脑、3-路由器、4-其他',
+  `pay_way` tinyint(4) NOT NULL DEFAULT '0' COMMENT '付费方式：0-免费、1-季付、2-月付、3-半年付、4-年付',
   `balance` int(11) NOT NULL DEFAULT '0' COMMENT '余额，单位分',
   `score` int(11) NOT NULL DEFAULT '0' COMMENT '积分',
   `enable_time` date DEFAULT NULL COMMENT '开通日期',
@@ -301,7 +301,7 @@ INSERT INTO `config` VALUES ('27', 'reset_traffic', 1);
 INSERT INTO `config` VALUES ('28', 'default_days', 7);
 INSERT INTO `config` VALUES ('29', 'subscribe_max', 3);
 INSERT INTO `config` VALUES ('30', 'min_port', 10000);
-INSERT INTO `config` VALUES ('31', 'max_port', 40000);
+INSERT INTO `config` VALUES ('31', 'max_port', 20000);
 INSERT INTO `config` VALUES ('32', 'is_captcha', 0);
 INSERT INTO `config` VALUES ('33', 'is_traffic_ban', 1);
 INSERT INTO `config` VALUES ('34', 'traffic_ban_value', 10);
@@ -329,6 +329,14 @@ INSERT INTO `config` VALUES ('55', 'website_analytics', '');
 INSERT INTO `config` VALUES ('56', 'website_customer_service', '');
 INSERT INTO `config` VALUES ('57', 'register_ip_limit', 5);
 INSERT INTO `config` VALUES ('58', 'goods_purchase_limit_strategy', 'none');
+INSERT INTO `config` VALUES ('59', 'is_push_bear', 0);
+INSERT INTO `config` VALUES ('60', 'push_bear_send_key', '');
+INSERT INTO `config` VALUES ('61', 'push_bear_qrcode', '');
+INSERT INTO `config` VALUES ('62', 'is_ban_status', 0);
+INSERT INTO `config` VALUES ('63', 'is_namesilo', 0);
+INSERT INTO `config` VALUES ('64', 'namesilo_key', '');
+INSERT INTO `config` VALUES ('65', 'website_logo', '');
+INSERT INTO `config` VALUES ('66', 'website_home_logo', '');
 
 
 -- ----------------------------
@@ -886,6 +894,18 @@ CREATE TABLE `payment_callback` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='有赞云回调日志';
 
+CREATE TABLE `marketing` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `type` TINYINT(4) NOT NULL COMMENT '类型：1-邮件群发、2-订阅渠道群发',
+  `receiver` TEXT NOT NULL COMMENT '接收者' COLLATE 'utf8mb4_unicode_ci',
+  `title` VARCHAR(255) NOT NULL COMMENT '标题' COLLATE 'utf8mb4_unicode_ci',
+  `content` TEXT NOT NULL COMMENT '内容' COLLATE 'utf8mb4_unicode_ci',
+  `error` VARCHAR(255) NULL COMMENT '错误信息' COLLATE 'utf8mb4_unicode_ci',
+  `status` TINYINT(4) NOT NULL COMMENT '状态：-1-失败、0-待发送、1-成功',
+  `created_at` DATETIME NOT NULL,
+  `updated_at` DATETIME NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE='utf8mb4_unicode_ci';
 
 
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;

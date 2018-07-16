@@ -22,7 +22,7 @@ return [
     'no_need_invite_codes'            => '초청코드 없이 가입가능합니다',
 
     // 首页
-    'ratio_tips'                      => '서버RSS：서버가 변경될경유 클라이언트 에서 자동으로 갱신 ',
+    'ratio_tips'                      => '지원 기능의 구독 기능을 사용하는 클라이언트 사용, 구독 기능으로 클라이언트 동기화 정보를 입력할 수 있습니다.',
     'subscribe_button'                => 'RSS구도주소 보기',
     'account_info'                    => '유저정보',
     'account_level'                   => '레벨',
@@ -98,7 +98,7 @@ return [
     'traffic_log_30days'              => '30 일트래픽 사용현황',
     'traffic_log_24hours'             => '24 간트패픽 사용현환',
     'traffic_log_keywords'            => '사용된트래픽',
-    'traffic_log_unit'                => '단위M',
+    'traffic_log_unit'                => '단위 / G',
     'traffic_log_max'                 => '최대치',
 
     // 邀请码
@@ -123,6 +123,7 @@ return [
     'invoice_table_name'              => '서버스',
     'invoice_table_price'             => '금액',
     'invoice_table_create_date'       => '구입일자',
+    'invoice_table_expire_at'         => '만료 시간',
     'invoice_table_status'            => '상태',
     'invoice_table_none'              => '데이터 없음',
     'invoice_table_closed'            => '닫혔어',
@@ -159,8 +160,13 @@ return [
     'referral_table_none'             => '데이터 없음',
     'referral_table_apply'            => '출금신청 ',
     'referral_summary'                => '총 :total 개기록，합계리턴 :amount 원， :money 원되여야 리턴가능 합니다。',
+    'referral_apply_title'            => '현금 인출 기록',
+    'referral_apply_table_amount'     => '양',
+    'referral_apply_table_status'     => '상태',
+    'referral_apply_table_date'       => '날짜',
     'console'                         => '관리센트',
     'profile'                         => '개인정보',
     'logout'                          => '로그아웃',
-    'promote'                         => '당신의 홍보주소로 회원가입하실경우 :traffic 트래픽증정，본인도 :traffic 트래픽증정；홍보링크로 가입한횐들이 소비할경우，소비금액의; :referral_percent% 리턴합니다',
+    'promote_link'                    => '보급 링크 등록을 통해 활성화, 양측 모두 :traffic 유량에 장려합니다; 그들이 소비할 때, 그들의 소비 금액을 얻을 수 있는 :referral_percent% 를 장려합니다.',
+    'promote_invite_code'             => '요청을 통해 등록 및 활성화, 양측 모두 :traffic 유량에 장려합니다, 그들이 소비할 때, 그들의 소비 금액을 얻을 수 있습니다 :referral_percent% 를 장려합니다',
 ];

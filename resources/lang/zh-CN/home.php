@@ -22,7 +22,7 @@ return [
     'no_need_invite_codes'            => '现在无需邀请码',
 
     // 首页
-    'ratio_tips'                      => '推荐使用支持节点订阅的客户端，通过订阅功能可以在客户端快速同步节点信息。',
+    'ratio_tips'                      => '推荐使用支持节点订阅功能的客户端，通过订阅功能可以在客户端快速同步节点信息。',
     'subscribe_button'                => '获取订阅地址',
     'account_info'                    => '账号信息',
     'account_level'                   => '等级',
@@ -90,17 +90,17 @@ return [
     'service_days'                    => '有效期',
     'service_buy_button'              => '购买',
     'day'                             => '天',
-    'coupon'                          => '充值券',
+    'coupon'                          => '优惠券',
     'redeem_coupon'                   => '使用',
     'service_type_1'                  => '流量包',
     'service_type_2'                  => '套餐',
 
     // 流量日志
-    'traffic_log_tips'                => '提示：流量统计图更新会有延迟。按天统计图在次日更新，按小时统计图在次小时更新。',
-    'traffic_log_30days'              => '最近 30 天的流量使用情况',
-    'traffic_log_24hours'             => '最近 24 小时的流量使用情况',
+    'traffic_log_tips'                => '提示：流量统计更新会有延迟。按天统计于次日更新，按小时统计于次小时更新。（每月1日不显示月流量统计数据）',
+    'traffic_log_30days'              => '本月流量使用情况',
+    'traffic_log_24hours'             => '今日流量使用情况',
     'traffic_log_keywords'            => '使用流量',
-    'traffic_log_unit'                => '单位 / MB',
+    'traffic_log_unit'                => '单位 / G',
     'traffic_log_max'                 => '使用高峰',
 
     // 邀请码
@@ -125,6 +125,7 @@ return [
     'invoice_table_name'              => '服务',
     'invoice_table_price'             => '金额',
     'invoice_table_create_date'       => '购买日期',
+    'invoice_table_expire_at'         => '到期时间',
     'invoice_table_status'            => '状态',
     'invoice_table_none'              => '暂无数据',
     'invoice_table_closed'            => '关闭',
@@ -161,8 +162,13 @@ return [
     'referral_table_none'             => '暂无数据',
     'referral_table_apply'            => '提现',
     'referral_summary'                => '合计返利 :amount 元（ :total 次），满 :money 元可以申请提现。',
+    'referral_apply_title'            => '提现记录',
+    'referral_apply_table_amount'     => '提现金额',
+    'referral_apply_table_status'     => '状态',
+    'referral_apply_table_date'       => '提现日期',
     'console'                         => '管理中心',
     'profile'                         => '个人设置',
     'logout'                          => '退出登入',
-    'promote'                         => '通过您的推广链接注册并激活，你们双方都将获得 :traffic 流量奖励；当他们消费时，您将获得他们消费金额的 :referral_percent% 作为奖励。',
+    'promote_link'                    => '通过您的推广链接注册并激活，你们双方都将获得 :traffic 流量奖励；当他们消费时，您将获得他们消费金额的 :referral_percent% 作为奖励。',
+    'promote_invite_code'             => '通过您的邀请码注册并激活，你们双方都将获得 :traffic 流量奖励；当他们消费时，您将获得他们消费金额的 :referral_percent% 作为奖励。',
 ];

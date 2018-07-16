@@ -22,7 +22,7 @@ return [
     'no_need_invite_codes'            => '現在無需邀請碼，即可注册',
 
     // 首页
-    'ratio_tips'                      => '推薦使用支持節點訂閱的代理用戶端，只需填寫一次，即可快捷方便的在用戶端設定和同步節點資訊。',
+    'ratio_tips'                      => '推薦使用支持節點訂閱功能的用戶端，通過訂閱功能可以在用戶端快速同步節點資訊。',
     'subscribe_button'                => '獲取訂閱地址',
     'account_info'                    => '帳號資訊',
     'account_level'                   => '等級',
@@ -49,7 +49,7 @@ return [
     'close'                           => '取消',
     'redeem_score'                    => '兌換流量',
     'redeem'                          => '立即兌換',
-    'redeem_info'                     => '您有：score積分，可兌換：scoreM免費流量。',
+    'redeem_info'                     => '您有 :score積分，可兌換 :scoreM免費流量。',
     'coupon_code'                     => '優惠券碼',
     'please_input_coupon'             => '請輸入優惠券碼',
     'scan_qrcode'                     => '請使用用戶端掃描二維碼',
@@ -96,11 +96,11 @@ return [
     'service_type_2'                  => '套餐',
 
     // 流量日志
-    'traffic_log_tips'                => '提示：流量統計圖更新會有延遲。按天統計圖在次日更新，按小時統計圖在次小時更新。',
+    'traffic_log_tips'                => '提示：流量統計更新會有延遲。按天統計于次日更新，按小時統計圖于次小時更新。（每月1日不顯示月流量統計數據）',
     'traffic_log_30days'              => '最近 30 天的流量使用情况',
     'traffic_log_24hours'             => '最近 24 小時的流量使用情况',
     'traffic_log_keywords'            => '使用流量',
-    'traffic_log_unit'                => '組織 / MB',
+    'traffic_log_unit'                => '單位 / G',
     'traffic_log_max'                 => '使用高峰',
 
     // 邀请码
@@ -125,6 +125,7 @@ return [
     'invoice_table_name'              => '服務',
     'invoice_table_price'             => '金額',
     'invoice_table_create_date'       => '購買日期',
+    'invoice_table_expire_at'         => '到期時間',
     'invoice_table_status'            => '狀態',
     'invoice_table_none'              => '暫無數據',
     'invoice_table_closed'            => '關閉',
@@ -160,9 +161,14 @@ return [
     'referral_table_date'             => '返利時間',
     'referral_table_none'             => '暫無數據',
     'referral_table_apply'            => '提現',
-    'referral_summary'                => '合計返利：amount元（：total次），滿：money元可以申請提現。',
+    'referral_summary'                => '合計返利 :amount 元（:total次），滿 :money元 可以申請提現。',
+    'referral_apply_title'            => '提現記錄',
+    'referral_apply_table_amount'     => '提現金額',
+    'referral_apply_table_status'     => '狀態',
+    'referral_apply_table_date'       => '提現日期',
     'console'                         => '管理中心',
     'profile'                         => '個人設置',
     'logout'                          => '登出',
-    'promote'                         => '通過您的推廣連結注册並啟動，您和新用戶都會獲得：traffic流量獎勵；當他們消費時，您將獲得他們消費金額的：referral_percent%作為獎勵。',
+    'promote_link'                    => '通過您的推廣連結注册並啟動，您和新用戶都會獲得 :traffic 流量獎勵；當他們消費時，您將獲得他們消費金額的 :referral_percent% 作為獎勵。',
+    'promote_invite_code'             => '通過您的邀請碼注册並啟動，您和新用戶都會獲得 :traffic 流量獎勵；當他們消費時，您將獲得他們消費金額的 :referral_percent% 作為獎勵。',
 ];
