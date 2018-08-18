@@ -95,13 +95,15 @@ Route::group(['middleware' => ['forbidden', 'user', 'admin']], function () {
     Route::get("marketing/emailList", "MarketingController@emailList"); // 邮件消息列表
     Route::get("marketing/pushList", "MarketingController@pushList"); // 推送消息列表
     Route::post("marketing/addPushMarketing", "MarketingController@addPushMarketing"); // 推送消息
+    Route::get("sensitiveWords/list", "SensitiveWordsController@sensitiveWordslist"); // 敏感词列表
+    Route::post("sensitiveWords/add", "SensitiveWordsController@addSensitiveWords"); // 添加敏感词
+    Route::get('logs', '\Rap2hpoutre\LaravelLogViewer\LogViewerController@index'); // 系统运行日志
 });
 
 Route::group(['middleware' => ['forbidden', 'user', 'affiliate']], function () {
     Route::any('/', 'UserController@index'); // 用户首页
     Route::any('user', 'UserController@index'); // 用户首页
     Route::any('user/article', 'UserController@article'); // 文章详情
-    Route::get('user/subscribe', 'UserController@subscribe'); // 节点订阅
     Route::post('user/exchangeSubscribe', 'UserController@exchangeSubscribe'); // 更换节点订阅地址
     Route::get('user/goodsList', 'UserController@goodsList'); // 商品列表
     Route::get('user/trafficLog', 'UserController@trafficLog'); // 流量日志
@@ -128,11 +130,11 @@ Route::group(['middleware' => ['forbidden', 'user', 'affiliate']], function () {
 });
 
 // V2Ray
-Route::group(['namespaces' => 'Muv2', 'prefix' => 'mu/v2', 'middleware' => ['Muv2']], function () {
+Route::group(['namespace' => 'Muv2', 'prefix' => 'mu/v2', 'middleware' => ['Muv2']], function () {
     Route::get('users', 'UserController@index');
     Route::post('users/{id}/traffic', 'UserController@addTraffic');
     Route::post('nodes/{id}/online_count', 'NodeController@onlineUserLog');
-    Route::post('nodes/{id}/info', 'NodeController@info');
+    Route::any('nodes/{id}/info', 'NodeController@info');
     Route::get('nodes/{id}/users', 'NodeController@users');
     Route::get('nodes/{id}/v2rayUsers', 'NodeController@v2rayUsers');
     Route::post('nodes/{id}/traffic', 'NodeController@postTraffic');

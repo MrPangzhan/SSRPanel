@@ -28,7 +28,8 @@ use App\Http\Models\UserSubscribe;
 use App\Http\Models\UserTrafficDaily;
 use App\Http\Models\UserTrafficHourly;
 use App\Http\Models\UserTrafficLog;
-use Maatwebsite\Excel\Facades\Excel;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Illuminate\Http\Request;
 use Redirect;
 use Response;
@@ -1042,7 +1043,7 @@ class AdminController extends Controller
                 $str = '';
                 if (false !== strpos($item, 'ssr://')) {
                     $str = mb_substr($item, 6);
-                } else if (false !== strpos($item, 'ss://')) {
+                } elseif (false !== strpos($item, 'ss://')) {
                     $str = mb_substr($item, 5);
                 }
 
@@ -1249,8 +1250,7 @@ class AdminController extends Controller
             $obfs_param = $user->obfs_param ? $user->obfs_param : $node->obfs_param;
             $protocol_param = $node->single ? $user->port . ':' . $user->passwd : $user->protocol_param;
 
-            $ssr_str = '';
-            $ssr_str .= ($node->server ? $node->server : $node->ip) . ':' . ($node->single ? $node->single_port : $user->port);
+            $ssr_str = ($node->server ? $node->server : $node->ip) . ':' . ($node->single ? $node->single_port : $user->port);
             $ssr_str .= ':' . ($node->single ? $node->single_protocol : $user->protocol) . ':' . ($node->single ? $node->single_method : $user->method);
             $ssr_str .= ':' . ($node->single ? $node->single_obfs : $user->obfs) . ':' . ($node->single ? base64url_encode($node->single_passwd) : base64url_encode($user->passwd));
             $ssr_str .= '/?obfsparam=' . base64url_encode($obfs_param);
@@ -1263,9 +1263,8 @@ class AdminController extends Controller
             $ssr_scheme = 'ssr://' . $ssr_str;
 
             // 生成ss scheme
-            $ss_str = '';
-            $ss_str .= $user->method . ':' . $user->passwd . '@';
-            $ss_str .= $node->server . ':' . $user->port;
+            $ss_str = $user->method . ':' . $user->passwd . '@';
+            $ss_str .= ($node->server ? $node->server : $node->ip) . ':' . $user->port;
             $ss_str = base64url_encode($ss_str) . '#' . 'VPN';
             $ss_scheme = 'ss://' . $ss_str;
 
@@ -1277,11 +1276,12 @@ class AdminController extends Controller
             $txt .= "远程端口：" . ($node->single ? $node->single_port : $user->port) . "\r\n";
             $txt .= "密码：" . ($node->single ? $node->single_passwd : $user->passwd) . "\r\n";
             $txt .= "加密方法：" . ($node->single ? $node->single_method : $user->method) . "\r\n";
+            $txt .= "路由：绕过局域网及中国大陆地址\r\n\r\n";
             $txt .= "协议：" . ($node->single ? $node->single_protocol : $user->protocol) . "\r\n";
             $txt .= "协议参数：" . ($node->single ? $user->port . ':' . $user->passwd : $user->protocol_param) . "\r\n";
             $txt .= "混淆方式：" . ($node->single ? $node->single_obfs : $user->obfs) . "\r\n";
             $txt .= "混淆参数：" . ($user->obfs_param ? $user->obfs_param : $node->obfs_param) . "\r\n";
-            $txt .= "本地端口：1080\r\n路由：绕过局域网及中国大陆地址";
+            $txt .= "本地端口：1080\r\n";
 
             $node->txt = $txt;
             $node->ssr_scheme = $ssr_scheme;
@@ -1351,7 +1351,7 @@ EOF;
                 Session::flash('errorMsg', '旧密码错误，请重新输入');
 
                 return Redirect::back();
-            } else if ($user->password == $new_password) {
+            } elseif ($user->password == $new_password) {
                 Session::flash('errorMsg', '新密码不可与旧密码一样，请重新输入');
 
                 return Redirect::back();
@@ -1428,9 +1428,17 @@ EOF;
             ];
         }
 
+        // 本月天数数据
+        $monthDays = [];
+        $monthHasDays = date("t");
+        for ($i = 1; $i <= $monthHasDays; $i++) {
+            $monthDays[] = $i;
+        }
+
         $view['trafficDaily'] = $trafficDaily;
         $view['trafficHourly'] = $trafficHourly;
         $view['username'] = $user->username;
+        $view['monthDays'] = "'" . implode("','", $monthDays) . "'";
 
         return Response::view('admin/userMonitor', $view);
     }
@@ -1926,22 +1934,26 @@ EOF;
     {
         $inviteList = Invite::query()->where('status', 0)->orderBy('id', 'asc')->get();
 
-        $filename = '邀请码' . date('Ymd');
-        Excel::create($filename, function ($excel) use ($inviteList) {
-            $excel->sheet('邀请码', function ($sheet) use ($inviteList) {
-                $sheet->row(1, [
-                    '邀请码', '有效期'
-                ]);
+        $filename = '邀请码' . date('Ymd') . '.xlsx';
 
-                if (!$inviteList->isEmpty()) {
-                    foreach ($inviteList as $k => $vo) {
-                        $sheet->row($k + 2, [
-                            $vo->code, $vo->dateline
-                        ]);
-                    }
-                }
-            });
-        })->export('xls');
+        $spreadsheet = new Spreadsheet();
+        $spreadsheet->getProperties()->setCreator('SSRPanel')->setLastModifiedBy('SSRPanel')->setTitle('邀请码')->setSubject('邀请码')->setDescription('')->setKeywords('')->setCategory('');
+
+        $spreadsheet->setActiveSheetIndex(0);
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('邀请码');
+        $sheet->fromArray(['邀请码', '有效期'], null);
+
+        foreach ($inviteList as $k => $vo) {
+            $sheet->fromArray([$vo->code, $vo->dateline], null, 'A' . ($k + 2));
+        }
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'); // 输出07Excel文件
+        //header('Content-Type:application/vnd.ms-excel'); // 输出Excel03版本文件
+        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+        $writer = new Xlsx($spreadsheet);
+        $writer->save('php://output');
     }
 
     // 提现申请列表
@@ -2039,7 +2051,7 @@ EOF;
             $log_ids = explode(',', $referralApply->link_logs);
             if ($referralApply && $status == 1) {
                 ReferralLog::query()->whereIn('id', $log_ids)->update(['status' => 1]);
-            } else if ($referralApply && $status == 2) {
+            } elseif ($referralApply && $status == 2) {
                 ReferralLog::query()->whereIn('id', $log_ids)->update(['status' => 2]);
             }
         }
