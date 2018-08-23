@@ -123,6 +123,7 @@ return [
     'invoice_title'                   => '消费记录',
     'invoice_table_id'                => '编号',
     'invoice_table_name'              => '服务',
+    'invoice_table_pay_way'           => '支付方式',
     'invoice_table_price'             => '金额',
     'invoice_table_create_date'       => '购买日期',
     'invoice_table_expire_at'         => '到期时间',
@@ -133,6 +134,7 @@ return [
     'invoice_table_wait_confirm'      => '待确认',
     'invoice_table_wait_active'       => '使用中',
     'invoice_table_expired'           => '已过期',
+    'invoice_table_goods_deleted'     => '[服務已刪除]',
 
     // 工单
     'ticket_title'                    => '我的服务单',
@@ -168,7 +170,7 @@ return [
     'referral_apply_table_date'       => '提现日期',
     'console'                         => '管理中心',
     'profile'                         => '个人设置',
-    'logout'                          => '退出登入',
+    'logout'                          => '退出',
     'promote_link'                    => '通过您的推广链接注册并激活，你们双方都将获得 :traffic 流量奖励；当他们消费时，您将获得他们消费金额的 :referral_percent% 作为奖励。',
     'promote_invite_code'             => '通过您的邀请码注册并激活，你们双方都将获得 :traffic 流量奖励；当他们消费时，您将获得他们消费金额的 :referral_percent% 作为奖励。',
 ];

@@ -106,16 +106,16 @@
                                             </div>
                                             <div class="tab-pane" id="tools4">
                                                 <ol>
-                                                    <li> 请从站长处获取App Store美区ID </li>
+                                                    <li> 请从站长处获取App Store美区ID及教程 </li>
                                                 </ol>
                                             </div>
                                             <div class="tab-pane" id="tools5">
                                                 <ol>
                                                     <li> <a href="#" target="_blank">点击此处</a>下载客户端并启动 </li>
-                                                    <li> 单击状态栏小飞机，找到服务器->编辑订阅，复制黏贴订阅地址 </li>
-                                                    <li> 点击服务器->手动更新订阅，更新您的服务信息 </li>
-                                                    <li> 更新成功后，请在服务器菜单处选择线路，并点击打开ShadowsocksR </li>
-                                                    <li> 单击小飞机，选择PAC自动模式 </li>
+                                                    <li> 单击左上角的shadowsocksR进入配置文件页，点击右下角的“+”号，点击“添加/升级SSR订阅”，填入订阅信息并保存 </li>
+                                                    <li> 选中任意一个节点，返回软件首页 </li>
+                                                    <li> 在软件首页处找到“路由”选项，并将其改为“绕过局域网及中国大陆地址” </li>
+                                                    <li> 点击右上角的小飞机图标进行连接，提示是否添加（或创建）VPN连接，点同意（或允许） </li>
                                                 </ol>
                                             </div>
                                         </div>
@@ -125,14 +125,15 @@
                         </div>
                     </div>
                 </div>
+
+                @if(!$nodeList->isEmpty())
                 <div class="row widget-row">
                     <div class="col-md-12">
                         <div class="portlet light bordered">
                             <div class="portlet-body">
                                 <div class="tab-content">
-                                <div class="tab-pane active">
-                                    <div class="mt-comments">
-                                        @if(!$nodeList->isEmpty())
+                                    <div class="tab-pane active">
+                                        <div class="mt-comments">
                                             @foreach($nodeList as $node)
                                                 <div class="mt-comment">
                                                     <div class="mt-comment-img" style="width:auto;">
@@ -153,7 +154,13 @@
                                                         </div>
                                                         <div class="mt-comment-text"> {{$node->desc}} </div>
                                                         <div class="mt-comment-details">
-                                                            <span class="mt-comment-status mt-comment-status-pending">流量结算比率：{{$node->traffic_rate}}</span>
+                                                            <span class="mt-comment-status mt-comment-status-pending">
+                                                                @if($node->labels)
+                                                                    @foreach($node->labels as $vo)
+                                                                        <span class="badge badge-info">{{$vo->labelInfo->name}}</span>
+                                                                    @endforeach
+                                                                @endif
+                                                            </span>
                                                             <ul class="mt-comment-actions" style="display: block;">
                                                                 <li>
                                                                     <a class="btn btn-sm green btn-outline" data-toggle="modal" href="#link_{{$node->id}}"> <i class="fa fa-paper-plane"></i> </a>
@@ -166,28 +173,16 @@
                                                     </div>
                                                 </div>
                                             @endforeach
-                                        @endif
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
                             </div>
                         </div>
                     </div>
                 </div>
+                @endif
             </div>
             <div class="col-md-4" style="padding-left: 3px;">
-                @if($is_push_bear && $push_bear_qrcode)
-                <ul class="list-group" style="border-radius: 4px;">
-                    <li class="list-group-item">
-                        <div style="text-align: center">
-                            <span> 微信扫码订阅，获取本站最新资讯 </span>
-                            <br><br>
-                            <div id="subscribe_qrcode" style="text-align: center;"></div>
-                        </div>
-                    </li>
-                </ul>
-                @endif
-
                 <ul class="list-group">
                     <li class="list-group-item">
                         {{trans('home.account_status')}}：{{$info['enable'] ? trans('home.enabled') : trans('home.disabled') }}
@@ -225,12 +220,24 @@
                     </li>
                 </ul>
 
+                @if($is_push_bear && $push_bear_qrcode)
+                    <ul class="list-group" style="border-radius: 4px;">
+                        <li class="list-group-item">
+                            <div style="text-align: center">
+                                <span> 微信扫码订阅，获取本站最新资讯 </span>
+                                <br><br>
+                                <div id="subscribe_qrcode" style="text-align: center;"></div>
+                            </div>
+                        </li>
+                    </ul>
+                @endif
+
                 <div class="list-group">
                     @if($notice)
-                        <a href="{{url('user/article?id=') . $notice->id}}" class="list-group-item"> {{$notice->title}} </a>
+                        <a href="{{url('article?id=') . $notice->id}}" class="list-group-item"> {{$notice->title}} </a>
                     @endif
                     @foreach($articleList as $k => $article)
-                        <a href="{{url('user/article?id=') . $article->id}}" class="list-group-item"> [{{date('m/d', strtotime($article->created_at))}}] {{str_limit($article->title, 50)}}</a>
+                        <a href="{{url('article?id=') . $article->id}}" class="list-group-item"> [{{date('m/d', strtotime($article->created_at))}}] {{str_limit($article->title, 50)}}</a>
                     @endforeach
                 </div>
             </div>
@@ -373,7 +380,7 @@
             }
 
             $.ajax({
-                url:'{{url('user/charge')}}',
+                url:'{{url('charge')}}',
                 type:"POST",
                 data:{_token:_token, coupon_sn:charge_coupon},
                 beforeSend:function(){
@@ -399,7 +406,7 @@
         function exchange() {
             $.ajax({
                 type: "POST",
-                url: "{{url('user/exchange')}}",
+                url: "{{url('exchange')}}",
                 async: false,
                 data: {_token:'{{csrf_token()}}'},
                 dataType: 'json',
@@ -444,7 +451,7 @@
 
         // 节点订阅
         function subscribe() {
-            window.location.href = '{{url('/user/subscribe')}}';
+            window.location.href = '{{url('subscribe')}}';
         }
 
         // 显示加密、混淆、协议
@@ -460,7 +467,7 @@
         // 更换订阅地址
         function exchangeSubscribe() {
             layer.confirm('更换订阅地址将导致：<br>1.旧地址立即失效；<br>2.连接密码被更改；', {icon: 7, title:'警告'}, function(index) {
-                $.post("{{url('user/exchangeSubscribe')}}", {_token:'{{csrf_token()}}'}, function (ret) {
+                $.post("{{url('exchangeSubscribe')}}", {_token:'{{csrf_token()}}'}, function (ret) {
                     layer.msg(ret.message, {time:1000}, function () {
                         if (ret.status == 'success') {
                             window.location.reload();
