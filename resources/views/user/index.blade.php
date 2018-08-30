@@ -231,15 +231,6 @@
                         </li>
                     </ul>
                 @endif
-
-                <div class="list-group">
-                    @if($notice)
-                        <a href="{{url('article?id=') . $notice->id}}" class="list-group-item"> {{$notice->title}} </a>
-                    @endif
-                    @foreach($articleList as $k => $article)
-                        <a href="{{url('article?id=') . $article->id}}" class="list-group-item"> [{{date('m/d', strtotime($article->created_at))}}] {{str_limit($article->title, 50)}}</a>
-                    @endforeach
-                </div>
             </div>
         </div>
         <div id="charge_modal" class="modal fade" tabindex="-1" data-focus-on="input:first" data-keyboard="false">
@@ -314,7 +305,7 @@
                     <div class="modal-content">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
-                            <h4 class="modal-title">Scheme Links - {{$node->name}}</h4>
+                            <h4 class="modal-title">{{$node->name}}</h4>
                         </div>
                         <div class="modal-body">
                             <textarea class="form-control" rows="5" readonly="readonly">{{$node->ssr_scheme}}</textarea>
