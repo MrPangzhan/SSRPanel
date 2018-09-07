@@ -20,6 +20,7 @@ use App\Http\Models\Ticket;
 use App\Http\Models\TicketReply;
 use App\Http\Models\User;
 use App\Http\Models\UserLabel;
+use App\Http\Models\UserLoginLog;
 use App\Http\Models\UserSubscribe;
 use App\Http\Models\UserTrafficDaily;
 use App\Http\Models\UserTrafficHourly;
@@ -81,6 +82,9 @@ class UserController extends Controller
 
         $view['subscribe_status'] = !$subscribe ? 1 : $subscribe->status;
         $view['link'] = $this->systemConfig['subscribe_domain'] ? $this->systemConfig['subscribe_domain'] . '/s/' . $code : $this->systemConfig['website_url'] . '/s/' . $code;
+
+        // 近期登录日志
+        $view['userLoginLog'] = UserLoginLog::query()->where('user_id', $user['id'])->orderBy('id', 'desc')->limit(10)->get();
 
         // 节点列表
         $userLabelIds = UserLabel::query()->where('user_id', $user['id'])->pluck('label_id');
@@ -984,9 +988,6 @@ class UserController extends Controller
                         Order::query()->where('oid', $vo->oid)->update(['is_expire' => 1]);
                         User::query()->where('id', $user->id)->decrement('transfer_enable', $vo->goods->traffic * 1048576);
                     }
-
-                    // 重置已用流量
-                    User::query()->where('id', $user->id)->update(['u' => 0, 'd' => 0]);
                 }
 
                 // 把商品的流量加到账号上
@@ -999,8 +1000,12 @@ class UserController extends Controller
                     $expireTime = date('Y-m-d', strtotime("+" . $goods->days . " days", strtotime($user->expire_time)));
                 }
 
-                // 更新账号过期时间
-                User::query()->where('id', $user->id)->update(['expire_time' => $expireTime, 'traffic_reset_day' => 1, 'enable' => 1]);
+                // 更新账号过期时间：套餐改流量重置日，重置已用流量
+                if ($goods->type == 2) {
+                    User::query()->where('id', $order->user_id)->update(['u' => 0, 'd' => 0, 'traffic_reset_day' => 1, 'expire_time' => $expireTime, 'enable' => 1]);
+                } else {
+                    User::query()->where('id', $order->user_id)->update(['expire_time' => $expireTime, 'enable' => 1]);
+                }
 
                 // 写入用户标签
                 if ($goods->label) {

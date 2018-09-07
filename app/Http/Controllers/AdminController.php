@@ -210,7 +210,7 @@ class AdminController extends Controller
             $user->remark = clean($request->get('remark', ''));
             $user->level = $request->get('level', 1);
             $user->is_admin = 0;
-            $user->reg_ip = $request->getClientIp();
+            $user->reg_ip = getClientIp();
             $user->referral_uid = 1;
             $user->traffic_reset_day = 0;
             $user->status = 1;
@@ -268,7 +268,7 @@ class AdminController extends Controller
                 $user->transfer_enable = toGB(1000);
                 $user->enable_time = date('Y-m-d');
                 $user->expire_time = date('Y-m-d', strtotime("+365 days"));
-                $user->reg_ip = $request->getClientIp();
+                $user->reg_ip = getClientIp();
                 $user->referral_uid = 1;
                 $user->traffic_reset_day = 0;
                 $user->status = 1;
@@ -400,7 +400,7 @@ class AdminController extends Controller
                 return Response::json(['status' => 'fail', 'data' => '', 'message' => '编辑失败']);
             }
         } else {
-            $user = User::query()->with(['label'])->where('id', $id)->first();
+            $user = User::query()->with(['label', 'referral'])->where('id', $id)->first();
             if ($user) {
                 $user->transfer_enable = flowToGB($user->transfer_enable);
 
@@ -1212,7 +1212,7 @@ class AdminController extends Controller
                     $obj->expire_time = '2099-01-01';
                     $obj->remark = '';
                     $obj->is_admin = 0;
-                    $obj->reg_ip = $request->getClientIp();
+                    $obj->reg_ip = getClientIp();
                     $obj->created_at = date('Y-m-d H:i:s');
                     $obj->updated_at = date('Y-m-d H:i:s');
                     $obj->save();
@@ -1551,6 +1551,14 @@ EOF;
             if ($request->hasFile('website_home_logo')) {
                 $file = $request->file('website_home_logo');
                 $fileType = $file->getClientOriginalExtension();
+
+                // 验证文件合法性
+                if (!in_array($fileType, ['jpg', 'png', 'jpeg', 'bmp'])) {
+                    Session::flash('errorMsg', 'LOGO不合法');
+
+                    return Redirect::back();
+                }
+
                 $logoName = date('YmdHis') . mt_rand(1000, 2000) . '.' . $fileType;
                 $move = $file->move(base_path() . '/public/upload/image/', $logoName);
                 $websiteHomeLogo = $move ? '/upload/image/' . $logoName : '';
@@ -1562,6 +1570,14 @@ EOF;
             if ($request->hasFile('website_logo')) {
                 $file = $request->file('website_logo');
                 $fileType = $file->getClientOriginalExtension();
+
+                // 验证文件合法性
+                if (!in_array($fileType, ['jpg', 'png', 'jpeg', 'bmp'])) {
+                    Session::flash('errorMsg', 'LOGO不合法');
+
+                    return Redirect::back();
+                }
+
                 $logoName = date('YmdHis') . mt_rand(1000, 2000) . '.' . $fileType;
                 $move = $file->move(base_path() . '/public/upload/image/', $logoName);
                 $websiteLogo = $move ? '/upload/image/' . $logoName : '';

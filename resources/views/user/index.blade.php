@@ -224,13 +224,21 @@
                     <ul class="list-group" style="border-radius: 4px;">
                         <li class="list-group-item">
                             <div style="text-align: center">
-                                <span> 微信扫码订阅，获取本站最新资讯 </span>
+                                <span> 微信扫码订阅，获取最新资讯 </span>
                                 <br><br>
                                 <div id="subscribe_qrcode" style="text-align: center;"></div>
                             </div>
                         </li>
                     </ul>
                 @endif
+
+                <ul class="list-group">
+                    @foreach($userLoginLog as $log)
+                    <li class="list-group-item">
+                        {{$log->created_at}}&ensp;{{$log->ip}}&ensp;{{$log->area}}&ensp;{{$log->isp}}
+                    </li>
+                    @endforeach
+                </ul>
             </div>
         </div>
         <div id="charge_modal" class="modal fade" tabindex="-1" data-focus-on="input:first" data-keyboard="false">
