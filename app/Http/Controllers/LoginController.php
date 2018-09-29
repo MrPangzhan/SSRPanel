@@ -54,7 +54,7 @@ class LoginController extends Controller
 
                 return Redirect::back();
             } elseif ($user->status == 0 && $this->systemConfig['is_active_register'] && $user->is_admin == 0) {
-                Session::flash('errorMsg', '账号未激活，请先<a href="/activeUser?username=' . $user->username . '" target="_blank"><span style="color:#000">【激活账号】</span></a>');
+                Session::flash('errorMsg', '账号未激活，请点击<a href="/activeUser?username=' . $user->username . '" target="_blank"><span style="color:#000">【激活账号】</span></a>');
 
                 return Redirect::back()->withInput();
             }
@@ -102,7 +102,7 @@ class LoginController extends Controller
             return Redirect::to('/')->cookie('remember', $remember_token, 36000);
         } else {
             if ($request->cookie("remember")) {
-                $u = User::query()->where("remember_token", $request->cookie("remember"))->first();
+                $u = User::query()->where('status', '>=', 0)->where("remember_token", $request->cookie("remember"))->first();
                 if ($u) {
                     Session::put('user', $u->toArray());
 

@@ -20,19 +20,16 @@ class Yzy
     {
         if (Cache::has('YZY_TOKEN')) {
             $token = Cache::get('YZY_TOKEN');
-            if (isset($token['error'])) { // 错误兼容
-                Cache::forget('YZY_TOKEN');
-            } else {
+            if (!isset($token['error'])) {
                 return Cache::get('YZY_TOKEN')['access_token'];
             }
+
+            Cache::forget('YZY_TOKEN');
         }
 
         $config = $this->systemConfig();
 
-        $keys['kdt_id'] = $config['kdt_id'];
-
-        $token = (new \Youzan\Open\Token($config['youzan_client_id'], $config['youzan_client_secret']))->getToken('self', $keys);
-
+        $token = (new \Youzan\Open\Token($config['youzan_client_id'], $config['youzan_client_secret']))->getToken('self', ['kdt_id' => $config['kdt_id']]);
         if (isset($token['error'])) {
             Log::info('获取有赞云支付access_token失败：' . $token['error_description']);
 
@@ -64,7 +61,15 @@ class Yzy
     {
         $client = new \Youzan\Open\Client($this->accessToken);
 
-        return $client->post('youzan.trade.get', '3.0.0', ['tid' => $tid]);
+        return $client->post('youzan.trade.get', '4.0.0', ['tid' => $tid]);
+    }
+
+    // 通过二维码ID获取已支付的交易信息
+    public function getTradeByQrId($qr_id)
+    {
+        $client = new \Youzan\Open\Client($this->accessToken);
+
+        return $client->post('youzan.trades.qr.get', '3.0.0', ['qr_id' => $qr_id, 'status' => 'TRADE_RECEIVED']);
     }
 
     // 系统配置

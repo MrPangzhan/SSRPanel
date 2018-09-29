@@ -563,7 +563,7 @@ class UserController extends Controller
         $view['website_customer_service'] = $this->systemConfig['website_customer_service'];
         $view['is_invite_register'] = $this->systemConfig['is_invite_register'];
         $view['is_free_code'] = $this->systemConfig['is_free_code'];
-        $view['inviteList'] = Invite::query()->where('uid', 1)->where('status', 0)->paginate();
+        $view['inviteList'] = Invite::query()->where('uid', 0)->where('status', 0)->paginate();
 
         return Response::view('user/free', $view);
     }
@@ -652,7 +652,7 @@ class UserController extends Controller
             }
 
             Cache::put('activeUser_' . md5($username), $activeTimes + 1, 1440);
-            Session::flash('successMsg', '邮件已发送，请查看邮箱');
+            Session::flash('successMsg', '激活邮件已发送，如未收到，请查看垃圾邮箱');
 
             return Redirect::back();
         } else {
@@ -914,7 +914,7 @@ class UserController extends Controller
 
             // 限购控制：all-所有商品限购, free-价格为0的商品限购, none-不限购（默认）
             $strategy = $this->systemConfig['goods_purchase_limit_strategy'];
-            if ($strategy == 'all' || ($strategy == 'free' && $goods->price == 0)) {
+            if ($strategy == 'all' || ($strategy == 'package' && $goods->type == 2) || ($strategy == 'free' && $goods->price == 0) || ($strategy == 'package&free' && ($goods->type == 2 || $goods->price == 0))) {
                 $noneExpireGoodExist = Order::query()->where('status', '>=', 0)->where('is_expire', 0)->where('user_id', $user['id'])->where('goods_id', $goods_id)->exists();
                 if ($noneExpireGoodExist) {
                     return Response::json(['status' => 'fail', 'data' => '', 'message' => '支付失败：商品不可重复购买']);
@@ -994,15 +994,20 @@ class UserController extends Controller
                 User::query()->where('id', $user->id)->increment('transfer_enable', $goods->traffic * 1048576);
 
                 // 计算账号过期时间
-                if ($user->expire_time < date('Y-m-d')) {
+                if ($user->expire_time < date('Y-m-d', strtotime("+" . $goods->days . " days"))) {
                     $expireTime = date('Y-m-d', strtotime("+" . $goods->days . " days"));
                 } else {
-                    $expireTime = date('Y-m-d', strtotime("+" . $goods->days . " days", strtotime($user->expire_time)));
+                    $expireTime = $user->expire_time;
                 }
 
-                // 更新账号过期时间：套餐改流量重置日，重置已用流量
+                // 套餐就改流量重置日，流量包不改
                 if ($goods->type == 2) {
-                    User::query()->where('id', $order->user_id)->update(['u' => 0, 'd' => 0, 'traffic_reset_day' => 1, 'expire_time' => $expireTime, 'enable' => 1]);
+                    if (date('m') == 2 && date('d') == 29) {
+                        $traffic_reset_day = 28;
+                    } else {
+                        $traffic_reset_day = date('d') == 31 ? 30 : abs(date('d'));
+                    }
+                    User::query()->where('id', $order->user_id)->update(['traffic_reset_day' => $traffic_reset_day, 'expire_time' => $expireTime, 'enable' => 1]);
                 } else {
                     User::query()->where('id', $order->user_id)->update(['expire_time' => $expireTime, 'enable' => 1]);
                 }
@@ -1039,6 +1044,9 @@ class UserController extends Controller
                     $this->addReferralLog($user->id, $user->referral_uid, $order->oid, $amount, $amount * $this->systemConfig['referral_percent']);
                 }
 
+                // 取消重复返利
+                User::query()->where('id', $order->user_id)->update(['referral_uid' => 0]);
+
                 DB::commit();
 
                 return Response::json(['status' => 'success', 'data' => '', 'message' => '支付成功']);
@@ -1074,6 +1082,11 @@ class UserController extends Controller
         // 积分满100才可以兑换
         if ($user['score'] < 100) {
             return Response::json(['status' => 'fail', 'data' => '', 'message' => '兑换失败：满100才可以兑换，请继续累计吧']);
+        }
+
+        // 账号过期不允许兑换
+        if ($user['expire_time'] < date('Y-m-d')) {
+            return Response::json(['status' => 'fail', 'data' => '', 'message' => '兑换失败：账号已过期，请先购买服务吧']);
         }
 
         DB::beginTransaction();
@@ -1119,6 +1132,7 @@ class UserController extends Controller
         $view['link'] = $this->systemConfig['website_url'] . '/register?aff=' . $user['id'];
         $view['referralLogList'] = ReferralLog::query()->where('ref_user_id', $user['id'])->with('user')->paginate(10);
         $view['referralApplyList'] = ReferralApply::query()->where('user_id', $user['id'])->with('user')->paginate(10);
+        $view['referralUserList'] = User::select(['username', 'created_at'])->where('referral_uid', $user['id'])->orderBy('id', 'desc')->paginate(10);
 
         return Response::view('user/referral', $view);
     }
@@ -1128,6 +1142,11 @@ class UserController extends Controller
     {
         $user = Session::get('user');
 
+        // 判断账户是否过期
+        if ($user['expire_time'] < date('Y-m-d')) {
+            return Response::json(['status' => 'fail', 'data' => '', 'message' => '申请失败：账号已过期，请先购买服务吧']);
+        }
+
         // 判断是否已存在申请
         $referralApply = ReferralApply::query()->where('user_id', $user['id'])->whereIn('status', [0, 1])->first();
         if ($referralApply) {
@@ -1136,7 +1155,8 @@ class UserController extends Controller
 
         // 校验可以提现金额是否超过系统设置的阀值
         $ref_amount = ReferralLog::query()->where('ref_user_id', $user['id'])->where('status', 0)->sum('ref_amount');
-        if ($ref_amount / 100 < $this->systemConfig['referral_money']) {
+        $ref_amount = $ref_amount / 100;
+        if ($ref_amount < $this->systemConfig['referral_money']) {
             return Response::json(['status' => 'fail', 'data' => '', 'message' => '申请失败：满' . $this->systemConfig['referral_money'] . '元才可以提现，继续努力吧']);
         }
 

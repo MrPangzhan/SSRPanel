@@ -43,6 +43,7 @@ CREATE TABLE `ss_node` (
   `monitor_url` VARCHAR(255) NULL DEFAULT NULL COMMENT '监控地址',
   `is_subscribe` TINYINT(4) NULL DEFAULT '1' COMMENT '是否允许用户订阅该节点：0-否、1-是',
   `ssh_port` SMALLINT(6) UNSIGNED NOT NULL DEFAULT '22' COMMENT 'SSH端口',
+  `is_tcp_check` TINYINT(4) NOT NULL DEFAULT '1' COMMENT '是否开启检测: 0-不开启、1-开启',
   `icmp` TINYINT(4) NOT NULL DEFAULT '1' COMMENT 'ICMP检测：-2-内外都不通、-1-内不通外通、0-外不通内通、1-内外都通',
   `tcp` TINYINT(4) NOT NULL DEFAULT '1' COMMENT 'TCP检测：-2-内外都不通、-1-内不通外通、0-外不通内通、1-内外都通',
   `udp` TINYINT(4) NOT NULL DEFAULT '1' COMMENT 'ICMP检测：-2-内外都不通、-1-内不通外通、0-外不通内通、1-内外都通',
@@ -346,6 +347,9 @@ INSERT INTO `config` VALUES ('64', 'namesilo_key', '');
 INSERT INTO `config` VALUES ('65', 'website_logo', '');
 INSERT INTO `config` VALUES ('66', 'website_home_logo', '');
 INSERT INTO `config` VALUES ('67', 'is_tcp_check', 0);
+INSERT INTO `config` VALUES ('68', 'tcp_check_warning_times', 3);
+INSERT INTO `config` VALUES ('69', 'is_forbid_china', 0);
+INSERT INTO `config` VALUES ('70', 'is_forbid_oversea', 0);
 
 
 -- ----------------------------
@@ -603,6 +607,22 @@ CREATE TABLE `user_balance_log` (
 
 
 -- ----------------------------
+-- Table structure for `user_traffic_modify_log`
+-- ----------------------------
+CREATE TABLE `user_traffic_modify_log` (
+	`id` INT(11) NOT NULL AUTO_INCREMENT,
+	`user_id` INT(11) NOT NULL DEFAULT '0' COMMENT '用户ID',
+	`order_id` INT(11) NOT NULL DEFAULT '0' COMMENT '发生的订单ID',
+	`before` INT(11) NOT NULL DEFAULT '0',
+	`after` INT(11) NOT NULL DEFAULT '0',
+	`desc` VARCHAR(255) NOT NULL DEFAULT '' COMMENT '描述',
+	`created_at` DATETIME NOT NULL,
+	`updated_at` DATETIME NOT NULL,
+	PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户流量变动日志';
+
+
+-- ----------------------------
 -- Table structure for `referral_apply`
 -- ----------------------------
 CREATE TABLE `referral_apply` (
@@ -740,6 +760,40 @@ INSERT INTO `sensitive_words` (`words`) VALUES ('zippiex.com');
 INSERT INTO `sensitive_words` (`words`) VALUES ('lrc8.com');
 INSERT INTO `sensitive_words` (`words`) VALUES ('1otc.com');
 INSERT INTO `sensitive_words` (`words`) VALUES ('emailna.co');
+INSERT INTO `sensitive_words` (`words`) VALUES ('mailinator.com');
+INSERT INTO `sensitive_words` (`words`) VALUES ('nbzmr.com');
+INSERT INTO `sensitive_words` (`words`) VALUES ('awsoo.com');
+INSERT INTO `sensitive_words` (`words`) VALUES ('zhcne.com');
+INSERT INTO `sensitive_words` (`words`) VALUES ('0box.eu');
+INSERT INTO `sensitive_words` (`words`) VALUES ('contbay.com');
+INSERT INTO `sensitive_words` (`words`) VALUES ('damnthespam.com');
+INSERT INTO `sensitive_words` (`words`) VALUES ('kurzepost.de');
+INSERT INTO `sensitive_words` (`words`) VALUES ('objectmail.com');
+INSERT INTO `sensitive_words` (`words`) VALUES ('proxymail.eu');
+INSERT INTO `sensitive_words` (`words`) VALUES ('rcpt.at');
+INSERT INTO `sensitive_words` (`words`) VALUES ('trash-mail.at');
+INSERT INTO `sensitive_words` (`words`) VALUES ('trashmail.at');
+INSERT INTO `sensitive_words` (`words`) VALUES ('trashmail.com');
+INSERT INTO `sensitive_words` (`words`) VALUES ('trashmail.io');
+INSERT INTO `sensitive_words` (`words`) VALUES ('trashmail.me');
+INSERT INTO `sensitive_words` (`words`) VALUES ('trashmail.net');
+INSERT INTO `sensitive_words` (`words`) VALUES ('wegwerfmail.de');
+INSERT INTO `sensitive_words` (`words`) VALUES ('wegwerfmail.net');
+INSERT INTO `sensitive_words` (`words`) VALUES ('wegwerfmail.org');
+INSERT INTO `sensitive_words` (`words`) VALUES ('nwytg.net');
+INSERT INTO `sensitive_words` (`words`) VALUES ('despam.it');
+INSERT INTO `sensitive_words` (`words`) VALUES ('spambox.us');
+INSERT INTO `sensitive_words` (`words`) VALUES ('spam.la');
+INSERT INTO `sensitive_words` (`words`) VALUES ('mytrashmail.com');
+INSERT INTO `sensitive_words` (`words`) VALUES ('mt2014.com');
+INSERT INTO `sensitive_words` (`words`) VALUES ('mt2015.com');
+INSERT INTO `sensitive_words` (`words`) VALUES ('thankyou2010.com');
+INSERT INTO `sensitive_words` (`words`) VALUES ('trash2009.com');
+INSERT INTO `sensitive_words` (`words`) VALUES ('mt2009.com');
+INSERT INTO `sensitive_words` (`words`) VALUES ('trashymail.com');
+INSERT INTO `sensitive_words` (`words`) VALUES ('tempemail.net');
+INSERT INTO `sensitive_words` (`words`) VALUES ('slopsbox.com');
+INSERT INTO `sensitive_words` (`words`) VALUES ('mailnesia.com');
 
 
 -- ----------------------------
@@ -1031,20 +1085,15 @@ CREATE TABLE `user_login_log` (
 	`user_id` INT(11) NOT NULL DEFAULT '0',
 	`ip` CHAR(20) NOT NULL,
 	`country` CHAR(20) NOT NULL,
-	`country_id` CHAR(20) NOT NULL,
-	`region` CHAR(20) NOT NULL,
-	`region_id` CHAR(20) NOT NULL,
+	`province` CHAR(20) NOT NULL,
 	`city` CHAR(20) NOT NULL,
-	`city_id` CHAR(20) NOT NULL,
 	`county` CHAR(20) NOT NULL,
-	`county_id` CHAR(20) NOT NULL,
 	`isp` CHAR(20) NOT NULL,
-	`isp_id` CHAR(20) NOT NULL,
+	`area` CHAR(20) NOT NULL,
 	`created_at` DATETIME NOT NULL,
 	`updated_at` DATETIME NOT NULL,
 	PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户登录日志';
-
+) ENGINE=InnoDB COLLATE='utf8mb4_general_ci' COMMENT='用户登录日志';
 
 
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;

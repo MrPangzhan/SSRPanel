@@ -75,6 +75,7 @@ Route::group(['middleware' => ['forbidden', 'user', 'admin']], function () {
     Route::post('admin/resetUserTraffic', 'AdminController@resetUserTraffic'); // 重置用户流量
     Route::post('admin/handleUserBalance', 'AdminController@handleUserBalance'); // 余额充值
     Route::get('admin/userBalanceLogList', 'AdminController@userBalanceLogList'); // 余额变动日志
+    Route::get('admin/userTrafficLogList', 'AdminController@userTrafficLogList'); // 流量变动记录
     Route::get('admin/userBanLogList', 'AdminController@userBanLogList'); // 用户封禁记录
     Route::get('admin/makePort', 'AdminController@makePort'); // 生成端口
     Route::get('admin/makePasswd', 'AdminController@makePasswd'); // 生成密码
@@ -100,7 +101,7 @@ Route::group(['middleware' => ['forbidden', 'user', 'admin']], function () {
     Route::get('logs', '\Rap2hpoutre\LaravelLogViewer\LogViewerController@index'); // 系统运行日志
 });
 
-Route::group(['middleware' => ['forbidden', 'user', 'affiliate']], function () {
+Route::group(['middleware' => ['forbidden', 'user']], function () {
     Route::any('/', 'UserController@index'); // 用户首页
     Route::any('article', 'UserController@article'); // 文章详情
     Route::post('exchangeSubscribe', 'UserController@exchangeSubscribe'); // 更换节点订阅地址
