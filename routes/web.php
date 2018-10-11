@@ -49,6 +49,7 @@ Route::group(['middleware' => ['forbidden', 'user', 'admin']], function () {
     Route::get('admin/applyList', 'AdminController@applyList'); // 提现申请管理
     Route::get('admin/applyDetail', 'AdminController@applyDetail'); // 提现申请管理
     Route::post('admin/setApplyStatus', 'AdminController@setApplyStatus'); // 设置提现申请状态
+    Route::get('admin/userRebateList', 'AdminController@userRebateList'); // 返利流水
     Route::any('admin/config', 'AdminController@config'); // 配置列表
     Route::post('admin/setExtend', 'AdminController@setExtend'); // 设置客服、统计代码
     Route::any('admin/addConfig', 'AdminController@addConfig'); // 添加配置
@@ -140,4 +141,19 @@ Route::group(['namespace' => 'Muv2', 'prefix' => 'mu/v2', 'middleware' => ['Muv2
     Route::get('nodes/{id}/users', 'NodeController@users');
     Route::get('nodes/{id}/v2rayUsers', 'NodeController@v2rayUsers');
     Route::post('nodes/{id}/traffic', 'NodeController@postTraffic');
+});
+
+// 自动提号机
+Route::group(['namespace' => 'Seller', 'prefix' => 'seller', 'middleware' => ['forbidden']], function () {
+    Route::get('/', 'IndexController@index');
+    Route::get('buy/{id}', 'IndexController@buy');
+    Route::post('createPayment', 'IndexController@createPayment'); // 创建支付单
+    Route::get('payment/{sn}', 'IndexController@payment'); // 支付单详情
+    Route::post('redeemCoupon', 'IndexController@redeemCoupon'); // 检查优惠券
+    Route::get('order', 'IndexController@order');
+    Route::post('searchOrder', 'IndexController@searchOrder');
+    Route::get('getPaymentStatus', 'IndexController@getPaymentStatus');
+    Route::get('send', 'IndexController@send');
+    Route::post('sendEmail', 'IndexController@sendEmail'); // 邮件重发
+    Route::any('info', 'IndexController@info'); // 余量查询
 });

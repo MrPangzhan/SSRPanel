@@ -21,7 +21,7 @@ class userExpireWarningToday extends Mailable
     public function build()
     {
         return $this->view('emails.userExpireWarningToday')->subject('账号过期提醒')->with([
-            'websiteName'    => $this->websiteName,
+            'websiteName' => $this->websiteName,
         ]);
     }
 }
