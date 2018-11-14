@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use Log;
 use DB;
 use Mail;
+use Hash;
 
 /**
  * 有赞云支付消息推送接收
@@ -136,15 +137,16 @@ class YzyController extends Controller
 
                 $user = new User();
                 $user->username = '自动生成-' . $payment->order->email;
-                $user->password = md5(makeRandStr());
+                $user->password = Hash::make(makeRandStr());
                 $user->port = $port;
                 $user->passwd = makeRandStr();
+                $user->vmess_id = createGuid();
                 $user->enable = 1;
                 $user->method = Helpers::getDefaultMethod();
                 $user->protocol = Helpers::getDefaultProtocol();
                 $user->obfs = Helpers::getDefaultObfs();
                 $user->usage = 1;
-                $user->transfer_enable = toGB(1000);
+                $user->transfer_enable = 1; // 新创建的账号给1，防止定时任务执行时发现u + d >= transfer_enable被判为流量超限而封禁
                 $user->enable_time = date('Y-m-d');
                 $user->expire_time = date('Y-m-d', strtotime("+" . $payment->order->goods->days . " days"));
                 $user->reg_ip = getClientIp();
@@ -172,7 +174,7 @@ class YzyController extends Controller
 
             // 商品为流量或者套餐
             if ($goods->type <= 2) {
-                // 如果买的是套餐，则先将之前购买的所有套餐置都无效，并扣掉之前所有套餐的流量
+                // 如果买的是套餐，则先将之前购买的所有套餐置都无效，并扣掉之前所有套餐的流量，重置用户已用流量为0
                 if ($goods->type == 2) {
                     $existOrderList = Order::query()
                         ->with(['goods'])
@@ -187,7 +189,14 @@ class YzyController extends Controller
 
                     foreach ($existOrderList as $vo) {
                         Order::query()->where('oid', $vo->oid)->update(['is_expire' => 1]);
-                        User::query()->where('id', $order->user_id)->decrement('transfer_enable', $vo->goods->traffic * 1048576);
+
+                        // 先判断，防止手动扣减过流量的用户流量被扣成负数
+                        if ($order->user->transfer_enable - $vo->goods->traffic * 1048576 <= 0) {
+                            User::query()->where('id', $order->user_id)->update(['u' => 0, 'd' => 0, 'transfer_enable' => 0]);
+                        } else {
+                            User::query()->where('id', $order->user_id)->update(['u' => 0, 'd' => 0]);
+                            User::query()->where('id', $order->user_id)->decrement('transfer_enable', $vo->goods->traffic * 1048576);
+                        }
                     }
                 }
 
@@ -256,11 +265,11 @@ class YzyController extends Controller
 
             // 自动提号机：如果order的email值不为空
             if ($order->email) {
-                $title = '【' . self::$systemConfig['website_name'] . '】您的账号信息';
+                $title = '自动发送账号信息';
                 $content = [
                     'order_sn'      => $order->order_sn,
                     'goods_name'    => $order->goods->name,
-                    'goods_traffic' => flowAutoShow($order->goods->traffic),
+                    'goods_traffic' => flowAutoShow($order->goods->traffic * 1048576),
                     'port'          => $order->user->port,
                     'passwd'        => $order->user->passwd,
                     'method'        => $order->user->method,
@@ -275,14 +284,14 @@ class YzyController extends Controller
                 // 获取可用节点列表
                 $labels = UserLabel::query()->where('user_id', $order->user_id)->get()->pluck('label_id');
                 $nodeIds = SsNodeLabel::query()->whereIn('label_id', $labels)->get()->pluck('node_id');
-                $nodeList = SsNode::query()->whereIn('id', $nodeIds)->orderBy('sort', 'desc')->orderBy('id', 'desc')->get();
+                $nodeList = SsNode::query()->whereIn('id', $nodeIds)->orderBy('sort', 'desc')->orderBy('id', 'desc')->get()->toArray();
                 $content['serverList'] = $nodeList;
 
                 try {
-                    Mail::to($order->email)->send(new sendUserInfo(self::$systemConfig['website_name'], $content));
-                    $this->sendEmailLog($order->user_id, $title, json_encode($content));
+                    Mail::to($order->email)->send(new sendUserInfo($content));
+                    Helpers::addEmailLog($order->email, $title, json_encode($content));
                 } catch (\Exception $e) {
-                    $this->sendEmailLog($order->user_id, $title, json_encode($content), 0, $e->getMessage());
+                    Helpers::addEmailLog($order->email, $title, json_encode($content), 0, $e->getMessage());
                 }
             }
 

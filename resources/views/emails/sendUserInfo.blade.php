@@ -18,7 +18,7 @@
                                                 <th style="Margin:0;color:#333;font-family:Helvetica,Arial,sans-serif;font-size:16px;font-weight:400;line-height:19px;margin:0;padding:0;text-align:left">
                                                     <h3 style="Margin:0;Margin-bottom:10px;color:inherit;font-family:Helvetica,Arial,sans-serif;font-size:28px;font-weight:400;line-height:1.3;margin:0;margin-bottom:0;padding:0;text-align:left;word-wrap:normal">
                                                         <a href="#" style="Margin:0;color:#40253b;font-family:Helvetica,Arial,sans-serif;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left;text-decoration:none" target="_blank">
-                                                            SSRPanel
+                                                            {{\App\Components\Helpers::systemConfig()['website_name']}}
                                                         </a>
                                                     </h3>
                                                 </th>
@@ -70,9 +70,6 @@
                                         <div class="release" style="padding-top:5px;padding-left:20px;padding-bottom:20px;">
                                             <table>
                                                 <tr>
-                                                    <td colspan="2" style="text-align: left;">您的账号信息如下</td>
-                                                </tr>
-                                                <tr>
                                                     <td>订单编号</td>
                                                     <td>{{$content['order_sn']}}</td>
                                                 </tr>
@@ -106,11 +103,10 @@
                                                 </tr>
                                                 @if($content['serverList'])
                                                     <tr>
-                                                        <td colspan="2" style="text-align: left;">节点列表</td>
+                                                        <td colspan="2">------------------------------------------</td>
                                                     </tr>
                                                     <tr>
-                                                        <th>节点名称</th>
-                                                        <th>节点地址</th>
+                                                        <td colspan="2" style="text-align: left;">节点列表</td>
                                                     </tr>
                                                     @foreach($content['serverList'] as $vo)
                                                         <tr>

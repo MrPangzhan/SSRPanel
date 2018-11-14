@@ -95,7 +95,6 @@
                                                                     <option value="1" @if($is_invite_register == '1') selected @endif>可选</option>
                                                                     <option value="2" @if($is_invite_register == '2') selected @endif>必须</option>
                                                                 </select>
-                                                                <span class="help-block"> 启用后必须使用邀请码进行注册 </span>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -153,6 +152,13 @@
                                                             <div class="col-md-9">
                                                                 <input type="checkbox" class="make-switch" @if($is_forbid_robot) checked @endif id="is_forbid_robot" data-on-color="success" data-off-color="danger" data-on-text="启用" data-off-text="关闭">
                                                                 <span class="help-block"> 如果是机器人、爬虫、代理访问网站则会抛出403错误 </span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label for="is_verify_register" class="col-md-3 control-label">注册校验验证码</label>
+                                                            <div class="col-md-9">
+                                                                <input type="checkbox" class="make-switch" @if($is_verify_register) checked @endif id="is_verify_register" data-on-color="success" data-off-color="danger" data-on-text="启用" data-off-text="关闭">
+                                                                <span class="help-block"> 注册时需要先通过邮件获取验证码方可注册，‘激活账号’失效 </span>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -281,7 +287,7 @@
                                                                         <button class="btn btn-success" type="button" onclick="setSubscribeDomain()">修改</button>
                                                                     </span>
                                                                 </div>
-                                                                <span class="help-block"> （推荐）防止面板域名被投毒后无法正常订阅，需带http://或https:// </span>
+                                                                <span class="help-block"> （推荐）防止面板域名被DNS投毒后无法正常订阅，需带http://或https:// </span>
                                                             </div>
                                                         </div>
                                                         <div class="col-md-6">
@@ -512,7 +518,29 @@
                                                                         <button class="btn btn-success" type="button" onclick="setCrashWarningEmail()">修改</button>
                                                                     </span>
                                                                 </div>
-                                                                <span class="help-block"> 填写此值则节点宕机、工单回复会自动提醒 </span>
+                                                                <span class="help-block"> 填写此值则节点宕机、用户回复工单都会自动提醒 </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <div class="col-md-6">
+                                                            <label for="is_tcp_check" class="col-md-3 control-label">TCP阻断检测</label>
+                                                            <div class="col-md-9">
+                                                                <input type="checkbox" class="make-switch" @if($is_tcp_check) checked @endif id="is_tcp_check" data-on-color="success" data-off-color="danger" data-on-text="启用" data-off-text="关闭">
+                                                                <span class="help-block"> 每30~60分钟内随机检测节点是否被TCP阻断并提醒 </span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label for="tcp_check_warning_times" class="col-md-3 control-label">阻断检测提醒</label>
+                                                            <div class="col-md-9">
+                                                                <div class="input-group">
+                                                                    <input class="form-control" type="text" name="tcp_check_warning_times" value="{{$tcp_check_warning_times}}" id="tcp_check_warning_times" placeholder="" />
+                                                                    <span class="input-group-addon">次</span>
+                                                                    <span class="input-group-btn">
+                                                                        <button class="btn btn-success" type="button" onclick="setTcpCheckWarningTimes()">修改</button>
+                                                                    </span>
+                                                                </div>
+                                                                <span class="help-block"> 提醒几次后自动下线节点，为0时不限制，不超过12 </span>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -593,28 +621,6 @@
                                                             </div>
                                                         </div>
                                                         <div class="col-md-6"></div>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <div class="col-md-6">
-                                                            <label for="is_tcp_check" class="col-md-3 control-label">TCP阻断检测</label>
-                                                            <div class="col-md-9">
-                                                                <input type="checkbox" class="make-switch" @if($is_tcp_check) checked @endif id="is_tcp_check" data-on-color="success" data-off-color="danger" data-on-text="启用" data-off-text="关闭">
-                                                                <span class="help-block"> 每小时自动检测节点是否被TCP阻断并提醒 </span>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <label for="tcp_check_warning_times" class="col-md-3 control-label">阻断检测提醒</label>
-                                                            <div class="col-md-9">
-                                                                <div class="input-group">
-                                                                    <input class="form-control" type="text" name="tcp_check_warning_times" value="{{$tcp_check_warning_times}}" id="tcp_check_warning_times" placeholder="" />
-                                                                    <span class="input-group-addon">次</span>
-                                                                    <span class="input-group-btn">
-                                                                        <button class="btn btn-success" type="button" onclick="setTcpCheckWarningTimes()">修改</button>
-                                                                    </span>
-                                                                </div>
-                                                                <span class="help-block"> 提醒几次后自动下线节点，为0时不限制，不超过12 </span>
-                                                            </div>
-                                                        </div>
                                                     </div>
                                                 </div>
                                             </form>
@@ -720,7 +726,7 @@
                                                     <div class="form-group">
                                                         <div class="col-md-12">
                                                             <div class="alert alert-info" style="text-align: center;">
-                                                                请在<a href="https://console.youzanyun.com/login" target="_blank">有赞云</a>后台设置应用的推送网址为：{{$website_url . '/api/yzy'}}
+                                                                请在<a href="https://console.youzanyun.com/login" target="_blank" style="color: red;">有赞云</a>设置应用的推送网址为：{{$website_url . '/api/yzy'}}
                                                             </div>
                                                         </div>
                                                     </div>
@@ -729,7 +735,7 @@
                                                             <label for="is_youzan" class="col-md-3 control-label">本功能</label>
                                                             <div class="col-md-9">
                                                                 <input type="checkbox" class="make-switch" @if($is_youzan) checked @endif id="is_youzan" data-on-color="success" data-off-color="danger" data-on-text="启用" data-off-text="关闭">
-                                                                <span class="help-block"> 请先到<a href="https://console.youzanyun.com/dashboard">有赞云</a>申请client_id和client_secret并绑定店铺 </span>
+                                                                <span class="help-block"> 请先到<a href="https://console.youzanyun.com/dashboard">有赞云</a>申请client_id和client_secret并绑定店铺（<a href="https://github.com/ssrpanel/SSRPanel/wiki/%E6%9C%89%E8%B5%9E%E4%BA%91%E6%94%AF%E4%BB%98" target="_blank">申请教程</a>） </span>
                                                             </div>
                                                         </div>
                                                         <div class="col-md-6">
@@ -932,6 +938,21 @@
                 var is_forbid_robot = state ? 1 : 0;
 
                 $.post("{{url('admin/setConfig')}}", {_token:'{{csrf_token()}}', name:'is_forbid_robot', value:is_forbid_robot}, function (ret) {
+                    layer.msg(ret.message, {time:1000}, function() {
+                        if (ret.status == 'fail') {
+                            window.location.reload();
+                        }
+                    });
+                });
+            }
+        });
+
+        // 启用、禁用注册校验验证码
+        $('#is_verify_register').on({
+            'switchChange.bootstrapSwitch': function(event, state) {
+                var is_verify_register = state ? 1 : 0;
+
+                $.post("{{url('admin/setConfig')}}", {_token:'{{csrf_token()}}', name:'is_verify_register', value:is_verify_register}, function (ret) {
                     layer.msg(ret.message, {time:1000}, function() {
                         if (ret.status == 'fail') {
                             window.location.reload();
@@ -1808,7 +1829,12 @@
                 return ;
             }
 
-            $.post("{{url('admin/setReferralPercent')}}", {_token:'{{csrf_token()}}', value:referral_percent}, function (ret) {
+            if (referral_percent > 100) {
+                layer.msg('不能大于100', {time:1000});
+                return ;
+            }
+
+            $.post("{{url('admin/setConfig')}}", {_token:'{{csrf_token()}}', name:'referral_percent', value:referral_percent}, function (ret) {
                 layer.msg(ret.message, {time:1000}, function() {
                     if (ret.status == 'fail') {
                         window.location.reload();

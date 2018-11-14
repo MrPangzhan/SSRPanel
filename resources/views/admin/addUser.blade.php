@@ -30,7 +30,6 @@
                                                 <label for="username" class="col-md-3 control-label">用户名</label>
                                                 <div class="col-md-8">
                                                     <input type="text" class="form-control" name="username" id="username" placeholder="" autofocus required>
-                                                    <input type="hidden" name="_token" value="{{csrf_token()}}">
                                                 </div>
                                             </div>
                                             <div class="form-group">
@@ -112,6 +111,25 @@
                                                     <span class="help-block"> 留空默认为一年 </span>
                                                 </div>
                                             </div>
+                                            <div class="form-group">
+                                                <label for="status" class="col-md-3 control-label">账户状态</label>
+                                                <div class="col-md-8">
+                                                    <div class="mt-radio-inline">
+                                                        <label class="mt-radio">
+                                                            <input type="radio" name="status" value="1" checked> 正常
+                                                            <span></span>
+                                                        </label>
+                                                        <label class="mt-radio">
+                                                            <input type="radio" name="status" value="0"> 未激活
+                                                            <span></span>
+                                                        </label>
+                                                        <label class="mt-radio">
+                                                            <input type="radio" name="status" value="-1"> 禁用
+                                                            <span></span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
                                             <hr>
                                             <div class="form-group">
                                                 <label for="labels" class="col-md-3 control-label">标签</label>
@@ -173,7 +191,7 @@
                                             <div class="form-group">
                                                 <label for="port" class="col-md-3 control-label">端口</label>
                                                 <div class="col-md-8">
-                                                    @if($is_rand_port)
+                                                    @if(\App\Components\Helpers::systemConfig()['is_rand_port'])
                                                         <div class="input-group">
                                                             <input class="form-control" type="text" name="port" value="{{$last_port}}" id="port" />
                                                             <span class="input-group-btn">
@@ -282,6 +300,18 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            <hr>
+                                            <div class="form-group">
+                                                <label for="vmess_id" class="col-md-3 control-label">VMess用户ID</label>
+                                                <div class="col-md-8">
+                                                    <div class="input-group">
+                                                        <input class="form-control" type="text" name="vmess_id" value="{{createGuid()}}" id="vmess_id" />
+                                                        <span class="input-group-btn">
+                                                            <button class="btn btn-success" type="button" onclick="makeVmessId()"> <i class="fa fa-refresh"></i> </button>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                     <!-- END SAMPLE FORM PORTLET-->
@@ -334,6 +364,7 @@
             var username = $('#username').val();
             var password = $('#password').val();
             var pay_way = $("input:radio[name='pay_way']:checked").val();
+            var status = $("input:radio[name='status']:checked").val();
             var labels = $('#labels').val();
             var enable_time = $('#enable_time').val();
             var expire_time = $('#expire_time').val();
@@ -353,6 +384,7 @@
             var obfs_param = $('#obfs_param').val();
             var speed_limit_per_con = $('#speed_limit_per_con').val();
             var speed_limit_per_user = $('#speed_limit_per_user').val();
+            var vmess_id = $('#vmess_id').val();
 
             // 用途
             var usage = '';
@@ -367,7 +399,34 @@
                 type: "POST",
                 url: "{{url('admin/addUser')}}",
                 async: false,
-                data: {_token:_token, username: username, password:password, usage:usage, pay_way:pay_way, labels:labels, enable_time:enable_time, expire_time:expire_time, gender:gender, wechat:wechat, qq:qq, remark:remark, level:level, port:port, passwd:passwd, method:method, transfer_enable:transfer_enable, enable:enable, protocol:protocol, protocol_param:protocol_param, obfs:obfs, obfs_param:obfs_param, speed_limit_per_con:speed_limit_per_con, speed_limit_per_user:speed_limit_per_user},
+                data: {
+                    _token:_token,
+                    username: username,
+                    password:password,
+                    usage:usage,
+                    pay_way:pay_way,
+                    status:status,
+                    labels:labels,
+                    enable_time:enable_time,
+                    expire_time:expire_time,
+                    gender:gender,
+                    wechat:wechat,
+                    qq:qq,
+                    remark:remark,
+                    level:level,
+                    port:port,
+                    passwd:passwd,
+                    method:method,
+                    transfer_enable:transfer_enable,
+                    enable:enable,
+                    protocol:protocol,
+                    protocol_param:protocol_param,
+                    obfs:obfs,
+                    obfs_param:obfs_param,
+                    speed_limit_per_con:speed_limit_per_con,
+                    speed_limit_per_user:speed_limit_per_user,
+                    vmess_id:vmess_id
+                },
                 dataType: 'json',
                 success: function (ret) {
                     layer.msg(ret.message, {time:1000}, function() {
@@ -388,9 +447,16 @@
             });
         }
 
+        // 生成随机VmessId
+        function makeVmessId() {
+            $.get("{{url('makeVmessId')}}",  function(ret) {
+                $("#vmess_id").val(ret);
+            });
+        }
+
         // 生成随机密码
         function makePasswd() {
-            $.get("{{url('admin/makePasswd')}}",  function(ret) {
+            $.get("{{url('makePasswd')}}",  function(ret) {
                 $("#passwd").val(ret);
             });
         }
