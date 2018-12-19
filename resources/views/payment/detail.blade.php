@@ -1,9 +1,6 @@
 @extends('user.layouts')
-
 @section('css')
-
 @endsection
-@section('title', trans('home.panel'))
 @section('content')
     <!-- BEGIN CONTENT BODY -->
     <div class="page-content" style="padding-top:0;">
@@ -11,7 +8,7 @@
         <div class="portlet light bordered">
             <div class="portlet-body">
                 <div class="alert alert-info" style="text-align: center;">
-                    请使用<strong style="color:red;">支付宝、QQ、微信</strong>扫描如下二维码
+                    请使用<strong style="color:red;">支付宝、微信</strong>扫描如下二维码
                 </div>
                 <div class="row" style="text-align: center; font-size: 1.05em;">
                     <div class="col-md-12">
@@ -31,16 +28,16 @@
                                 </tr>
                                 <tr>
                                     <td colspan="2">
-                                        扫描下方二维码进行付款（可截图再扫描）
+                                        扫描下方二维码进行付款
                                         <br>
                                         请于15分钟内支付，到期未支付订单将自动关闭
                                         <br>
-                                        支付后，请稍作等待，账号状态会自动更新
+                                        支付后请稍作等待，系统将自动处理
                                     </td>
                                 </tr>
                                 <tr>
                                     <td colspan="2" align="center">
-                                        <img src="{{$payment->qr_local_url}}"/>
+                                        <img id="qr" src="{{$payment->qr_local_url}}"/>
                                     </td>
                                 </tr>
                             </table>
@@ -54,7 +51,6 @@
     <!-- END CONTENT BODY -->
 @endsection
 @section('script')
-    <script src="/js/layer/layer.js" type="text/javascript"></script>
     <script type="text/javascript">
         // 每800毫秒查询一次订单状态
         $(document).ready(function(){
@@ -77,6 +73,16 @@
                     })
                 }
             });
+        }
+
+        // 付款二维码自适应
+        var w = window.innerWidth;
+        var h = window.innerHeight;
+        x = document.getElementById("qr");
+        if (w <= h) {
+            x.setAttribute("width", "75%");
+        } else {
+            x.setAttribute("height", "75%");
         }
     </script>
 @endsection

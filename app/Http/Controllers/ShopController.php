@@ -14,19 +14,13 @@ use DB;
 
 /**
  * 商店控制器
- * Class LoginController
+ *
+ * Class ShopController
  *
  * @package App\Http\Controllers
  */
 class ShopController extends Controller
 {
-    protected static $systemConfig;
-
-    function __construct()
-    {
-        self::$systemConfig = Helpers::systemConfig();
-    }
-
     // 商品列表
     public function goodsList(Request $request)
     {
@@ -207,7 +201,6 @@ class ShopController extends Controller
                 $data = [
                     'name'     => $name,
                     'desc'     => $desc,
-                    'logo'     => $logo,
                     'price'    => $price * 100,
                     'sort'     => $sort,
                     'color'    => $color,
@@ -215,6 +208,10 @@ class ShopController extends Controller
                     'is_limit' => $is_limit,
                     'status'   => $status
                 ];
+
+                if ($logo) {
+                    $data['logo'] = $logo;
+                }
 
                 Goods::query()->where('id', $id)->update($data);
 

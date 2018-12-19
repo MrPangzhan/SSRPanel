@@ -37,6 +37,13 @@ use DB;
 use Auth;
 use Hash;
 
+/**
+ * 用户控制器
+ *
+ * Class UserController
+ *
+ * @package App\Http\Controllers
+ */
 class UserController extends Controller
 {
     protected static $systemConfig;
@@ -215,9 +222,6 @@ class UserController extends Controller
             $wechat = $request->get('wechat');
             $qq = $request->get('qq');
             $passwd = trim($request->get('passwd'));
-            $method = $request->get('method');
-            $protocol = $request->get('protocol');
-            $obfs = $request->get('obfs');
 
             // 修改密码
             if ($old_password && $new_password) {
@@ -270,52 +274,24 @@ class UserController extends Controller
                 }
             }
 
-            // 修改SSR(R)设置
-            if ($method || $protocol || $obfs) {
-                if (empty($passwd)) {
-                    Session::flash('errorMsg', '密码不能为空');
-
-                    return Redirect::to('profile#tab_3');
-                }
-
-                // 加密方式、协议、混淆必须存在
-                $existMethod = SsConfig::query()->where('type', 1)->where('name', $method)->first();
-                $existProtocol = SsConfig::query()->where('type', 2)->where('name', $protocol)->first();
-                $existObfs = SsConfig::query()->where('type', 3)->where('name', $obfs)->first();
-                if (!$existMethod || !$existProtocol || !$existObfs) {
-                    Session::flash('errorMsg', '非法请求');
-
-                    return Redirect::to('profile#tab_3');
-                }
-
-                $data = [
-                    'passwd'   => $passwd,
-                    'method'   => $method,
-                    'protocol' => $protocol,
-                    'obfs'     => $obfs
-                ];
-
-                $ret = User::query()->where('id', Auth::user()->id)->update($data);
+            // 修改代理密码
+            if ($passwd) {
+                $ret = User::query()->where('id', Auth::user()->id)->update(['passwd' => $passwd]);
                 if (!$ret) {
                     Session::flash('errorMsg', '修改失败');
 
                     return Redirect::to('profile#tab_3');
                 } else {
-                    // 更新session
-                    $user = User::query()->where('id', Auth::user()->id)->first()->toArray();
-                    Session::remove('user');
-                    Session::put('user', $user);
-
                     Session::flash('successMsg', '修改成功');
 
                     return Redirect::to('profile#tab_3');
                 }
             }
+
+            Session::flash('errorMsg', '非法请求');
+
+            return Redirect::to('profile#tab_1');
         } else {
-            // 加密方式、协议、混淆
-            $view['method_list'] = Helpers::methodList();
-            $view['protocol_list'] = Helpers::protocolList();
-            $view['obfs_list'] = Helpers::obfsList();
             $view['info'] = User::query()->where('id', Auth::user()->id)->first();
 
             return Response::view('user.profile', $view);
@@ -366,11 +342,11 @@ class UserController extends Controller
     }
 
     // 商品列表
-    public function goodsList(Request $request)
+    public function services(Request $request)
     {
         $view['goodsList'] = Goods::query()->where('status', 1)->where('is_del', 0)->where('type', '<=', '2')->orderBy('type', 'desc')->orderBy('sort', 'desc')->paginate(10)->appends($request->except('page'));
 
-        return Response::view('user.goodsList', $view);
+        return Response::view('user.services', $view);
     }
 
     // 工单
@@ -382,19 +358,19 @@ class UserController extends Controller
     }
 
     // 订单
-    public function orderList(Request $request)
+    public function invoices(Request $request)
     {
         $view['orderList'] = Order::query()->with(['user', 'goods', 'coupon', 'payment'])->where('user_id', Auth::user()->id)->orderBy('oid', 'desc')->paginate(10)->appends($request->except('page'));
 
-        return Response::view('user.orderList', $view);
+        return Response::view('user.invoices', $view);
     }
 
     // 订单明细
-    public function orderDetail(Request $request, $sn)
+    public function invoiceDetail(Request $request, $sn)
     {
         $view['order'] = Order::query()->with(['goods', 'coupon', 'payment'])->where('order_sn', $sn)->firstOrFail();
 
-        return Response::view('user.orderDetail', $view);
+        return Response::view('user.invoiceDetail', $view);
     }
 
     // 添加工单
@@ -601,8 +577,8 @@ class UserController extends Controller
                     return Response::json(['status' => 'fail', 'data' => '', 'message' => '支付失败：商品不可重复购买']);
                 }
             }
-      
-      	    // 单个商品限购
+
+            // 单个商品限购
             if ($goods->is_limit == 1) {
                 $noneExpireOrderExist = Order::query()->where('status', '>=', 0)->where('user_id', Auth::user()->id)->where('goods_id', $goods_id)->exists();
                 if ($noneExpireOrderExist) {
@@ -705,13 +681,24 @@ class UserController extends Controller
 
                         // 先判断，防止手动扣减过流量的用户流量被扣成负数
                         if ($order->user->transfer_enable - $vo->goods->traffic * 1048576 <= 0) {
+                            // 写入用户流量变动记录
+                            Helpers::addUserTrafficModifyLog($user->id, $order->oid, 0, 0, '[余额支付]用户购买套餐，先扣减之前套餐的流量(扣完)');
+
                             User::query()->where('id', $order->user_id)->update(['u' => 0, 'd' => 0, 'transfer_enable' => 0]);
                         } else {
+                            // 写入用户流量变动记录
+                            $user = User::query()->where('id', $user->id)->first(); // 重新取出user信息
+                            Helpers::addUserTrafficModifyLog($user->id, $order->oid, $user->transfer_enable, ($user->transfer_enable - $vo->goods->traffic * 1048576), '[余额支付]用户购买套餐，先扣减之前套餐的流量(未扣完)');
+
                             User::query()->where('id', $order->user_id)->update(['u' => 0, 'd' => 0]);
                             User::query()->where('id', $order->user_id)->decrement('transfer_enable', $vo->goods->traffic * 1048576);
                         }
                     }
                 }
+
+                // 写入用户流量变动记录
+                $user = User::query()->where('id', $user->id)->first(); // 重新取出user信息
+                Helpers::addUserTrafficModifyLog($user->id, $order->oid, $user->transfer_enable, ($user->transfer_enable + $goods->traffic * 1048576), '[余额支付]用户购买商品，加上流量');
 
                 // 把商品的流量加到账号上
                 User::query()->where('id', $user->id)->increment('transfer_enable', $goods->traffic * 1048576);
@@ -788,6 +775,7 @@ class UserController extends Controller
 
             $view['goods'] = $goods;
             $view['is_youzan'] = self::$systemConfig['is_youzan'];
+            $view['is_trimepay'] = self::$systemConfig['is_trimepay'];
 
             return Response::view('user.buy', $view);
         }
@@ -892,7 +880,7 @@ class UserController extends Controller
     // 帮助中心
     public function help(Request $request)
     {
-        $view['articleList'] = Article::query()->where('type', 1)->where('is_del', 0)->orderBy('sort', 'desc')->orderBy('id', 'desc')->limit(10)->paginate(15);
+        $view['articleList'] = Article::query()->where('type', 1)->where('is_del', 0)->orderBy('sort', 'desc')->orderBy('id', 'desc')->limit(10)->paginate(5);
 
         return Response::view('user.help', $view);
     }

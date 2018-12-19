@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Components\Helpers;
 use App\Components\Yzy;
+use App\Components\Trimepay;
 use App\Http\Models\Coupon;
 use App\Http\Models\Goods;
 use App\Http\Models\Order;
@@ -16,6 +17,13 @@ use Log;
 use DB;
 use Auth;
 
+/**
+ * 支付控制器
+ *
+ * Class PaymentController
+ *
+ * @package App\Http\Controllers
+ */
 class PaymentController extends Controller
 {
     protected static $systemConfig;
@@ -30,6 +38,7 @@ class PaymentController extends Controller
     {
         $goods_id = intval($request->get('goods_id'));
         $coupon_sn = $request->get('coupon_sn');
+        $pay_type = $request->get('pay_type');
 
         $goods = Goods::query()->where('is_del', 0)->where('status', 1)->where('id', $goods_id)->first();
         if (!$goods) {
@@ -37,7 +46,7 @@ class PaymentController extends Controller
         }
 
         // 判断是否开启有赞云支付
-        if (!self::$systemConfig['is_youzan']) {
+        if (!self::$systemConfig['is_youzan'] && !self::$systemConfig['is_trimepay']) {
             return Response::json(['status' => 'fail', 'data' => '', 'message' => '创建支付单失败：系统并未开启在线支付功能']);
         }
 
@@ -109,6 +118,13 @@ class PaymentController extends Controller
             $orderSn = date('ymdHis') . mt_rand(100000, 999999);
             $sn = makeRandStr(12);
 
+            // 支付方式
+            if (self::$systemConfig['is_youzan']) {
+                $pay_way = 2;
+            } else if (self::$systemConfig['is_trimepay']) {
+                $pay_way = 3;
+            }
+
             // 生成订单
             $order = new Order();
             $order->order_sn = $orderSn;
@@ -119,17 +135,34 @@ class PaymentController extends Controller
             $order->amount = $amount;
             $order->expire_at = date("Y-m-d H:i:s", strtotime("+" . $goods->days . " days"));
             $order->is_expire = 0;
-            $order->pay_way = 2;
+            $order->pay_way = $pay_way;
             $order->status = 0;
             $order->save();
 
             // 生成支付单
-            $yzy = new Yzy();
-            $result = $yzy->createQrCode($goods->name, $amount * 100, $orderSn);
-            if (isset($result['error_response'])) {
-                Log::error('【有赞云】创建二维码失败：' . $result['error_response']['msg']);
+            if (self::$systemConfig['is_youzan']) {
+                $yzy = new Yzy();
+                $result = $yzy->createQrCode($goods->name, $amount * 100, $orderSn);
+                if (isset($result['error_response'])) {
+                    Log::error('【有赞云】创建二维码失败：' . $result['error_response']['msg']);
 
-                throw new \Exception($result['error_response']['msg']);
+                    throw new \Exception($result['error_response']['msg']);
+                }
+            } else if (self::$systemConfig['is_trimepay']) {
+                $trimepay = new Trimepay(self::$systemConfig['trimepay_appid'], self::$systemConfig['trimepay_appsecret']);
+
+                if ($pay_type == 1) {
+                    $payMethod = 'ALIPAY_QR';
+                } else if ($pay_type == 2) {
+                    $payMethod = 'WEPAY_QR';
+                }
+
+                $result = $trimepay->pay($payMethod, $orderSn, $amount, self::$systemConfig['website_url'] . '/api/trimepay', self::$systemConfig['website_url']);
+                if ($result['code'] !== 0) {
+                    Log::error('【Trimepay】创建二维码失败：' . $result['msg']);
+
+                    throw new \Exception($result['msg']);
+                }
             }
 
             $payment = new Payment();
@@ -139,10 +172,16 @@ class PaymentController extends Controller
             $payment->order_sn = $orderSn;
             $payment->pay_way = 1;
             $payment->amount = $amount;
-            $payment->qr_id = $result['response']['qr_id'];
-            $payment->qr_url = $result['response']['qr_url'];
-            $payment->qr_code = $result['response']['qr_code'];
-            $payment->qr_local_url = $this->base64ImageSaver($result['response']['qr_code']);
+            if (self::$systemConfig['is_youzan']) {
+                $payment->qr_id = $result['response']['qr_id'];
+                $payment->qr_url = $result['response']['qr_url'];
+                $payment->qr_code = $result['response']['qr_code'];
+                $payment->qr_local_url = $this->base64ImageSaver($result['response']['qr_code']);
+            } else if (self::$systemConfig['is_trimepay']) {
+                $payment->qr_url = $result['data'];
+                $payment->qr_code = 'https://www.zhihu.com/qrcode?url=' . $result['data'];
+                $payment->qr_local_url = 'https://www.zhihu.com/qrcode?url=' . $result['data'];
+            }
             $payment->status = 0;
             $payment->save();
 

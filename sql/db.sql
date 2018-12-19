@@ -358,6 +358,13 @@ INSERT INTO `config` VALUES ('68', 'tcp_check_warning_times', 3);
 INSERT INTO `config` VALUES ('69', 'is_forbid_china', 0);
 INSERT INTO `config` VALUES ('70', 'is_forbid_oversea', 0);
 INSERT INTO `config` VALUES ('71', 'is_verify_register', 0);
+INSERT INTO `config` VALUES ('72', 'node_daily_report', 0);
+INSERT INTO `config` values ('73', 'mix_subscribe', 0);
+INSERT INTO `config` values ('74', 'rand_subscribe', 0);
+INSERT INTO `config` values ('75', 'is_custom_subscribe', 0);
+INSERT INTO `config` values ('76', 'is_trimepay', 0);
+INSERT INTO `config` VALUES ('77', 'trimepay_appid', '');
+INSERT INTO `config` VALUES ('78', 'trimepay_appsecret', '');
 
 
 -- ----------------------------
@@ -367,6 +374,7 @@ CREATE TABLE `article` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `title` varchar(100) NOT NULL DEFAULT '' COMMENT '标题',
   `author` varchar(50) DEFAULT '' COMMENT '作者',
+  `summary` varchar(255) DEFAULT '' COMMENT '简介',
   `content` text COMMENT '内容',
   `type` tinyint(4) DEFAULT '1' COMMENT '类型：1-文章、2-公告',
   `is_del` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否删除',
@@ -639,8 +647,8 @@ CREATE TABLE `user_traffic_modify_log` (
 	`id` INT(11) NOT NULL AUTO_INCREMENT,
 	`user_id` INT(11) NOT NULL DEFAULT '0' COMMENT '用户ID',
 	`order_id` INT(11) NOT NULL DEFAULT '0' COMMENT '发生的订单ID',
-	`before` INT(11) NOT NULL DEFAULT '0',
-	`after` INT(11) NOT NULL DEFAULT '0',
+	`before` BIGINT(20) NOT NULL DEFAULT '0' COMMENT '操作前流量',
+	`after` BIGINT(20) NOT NULL DEFAULT '0' COMMENT '操作后流量',
 	`desc` VARCHAR(255) NOT NULL DEFAULT '' COMMENT '描述',
 	`created_at` DATETIME NOT NULL,
 	`updated_at` DATETIME NOT NULL,
