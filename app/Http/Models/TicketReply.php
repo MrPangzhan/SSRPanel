@@ -9,16 +9,14 @@ use Illuminate\Database\Eloquent\Model;
  * Class TicketReply
  *
  * @package App\Http\Models
- * @property-read \App\Http\Models\User $User
  * @mixin \Eloquent
  */
 class TicketReply extends Model
 {
     protected $table = 'ticket_reply';
     protected $primaryKey = 'id';
-    public $timestamps = false;
 
-    public function User()
+    function user()
     {
         return $this->hasOne(User::class, 'id', 'user_id');
     }

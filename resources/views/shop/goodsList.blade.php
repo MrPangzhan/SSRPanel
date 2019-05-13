@@ -68,7 +68,6 @@
                                             <!-- <td> @if($goods->logo) <a href="{{$goods->logo}}" class="fancybox"><img src="{{$goods->logo}}"/></a> @endif </td> -->
                                             <td> {{$goods->type == 3 ? '' : $goods->traffic_label}} </td>
                                             <td> {{$goods->price}}元 </td>
-                                            <!-- <td> {{$goods->score}} </td> -->
                                             <td> {{$goods->sort}} </td>
                                             <td>
                                                 @if($goods->is_hot)
@@ -92,8 +91,8 @@
                                                 @endif
                                             </td>
                                             <td style="text-align: center;">
-                                                <button type="button" class="btn btn-sm blue btn-outline" onclick="editGoods('{{$goods->id}}')"><i class="fa fa-pencil"></i></button>
-                                                <button type="button" class="btn btn-sm red btn-outline" onclick="delGoods('{{$goods->id}}')"><i class="fa fa-trash"></i></button>
+                                                <button type="button" class="btn btn-sm blue btn-outline" onclick="editGoods('{{$goods->id}}')"> 编辑 </button>
+                                                <button type="button" class="btn btn-sm red btn-outline" onclick="delGoods('{{$goods->id}}')"> 删除 </button>
                                             </td>
                                         </tr>
                                     @endforeach

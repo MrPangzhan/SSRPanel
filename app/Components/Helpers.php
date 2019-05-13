@@ -8,6 +8,7 @@ use App\Http\Models\EmailLog;
 use App\Http\Models\Level;
 use App\Http\Models\SsConfig;
 use App\Http\Models\User;
+use App\Http\Models\UserSubscribe;
 use App\Http\Models\UserTrafficModifyLog;
 
 class Helpers
@@ -36,25 +37,25 @@ class Helpers
     // 获取默认加密方式
     public static function getDefaultMethod()
     {
-        $config = SsConfig::query()->where('type', 1)->where('is_default', 1)->first();
+        $config = SsConfig::default()->type(1)->first();
 
         return $config ? $config->name : 'aes-256-cfb';
-    }
-
-    // 获取默认混淆
-    public static function getDefaultObfs()
-    {
-        $config = SsConfig::query()->where('type', 3)->where('is_default', 1)->first();
-
-        return $config ? $config->name : 'plain';
     }
 
     // 获取默认协议
     public static function getDefaultProtocol()
     {
-        $config = SsConfig::query()->where('type', 2)->where('is_default', 1)->first();
+        $config = SsConfig::default()->type(2)->first();
 
         return $config ? $config->name : 'origin';
+    }
+
+    // 获取默认混淆
+    public static function getDefaultObfs()
+    {
+        $config = SsConfig::default()->type(3)->first();
+
+        return $config ? $config->name : 'plain';
     }
 
     // 获取一个随机端口
@@ -88,25 +89,36 @@ class Helpers
     // 加密方式
     public static function methodList()
     {
-        return SsConfig::query()->where('type', 1)->get();
+        return SsConfig::type(1)->get();
     }
 
     // 协议
     public static function protocolList()
     {
-        return SsConfig::query()->where('type', 2)->get();
+        return SsConfig::type(2)->get();
     }
 
     // 混淆
     public static function obfsList()
     {
-        return SsConfig::query()->where('type', 3)->get();
+        return SsConfig::type(3)->get();
     }
 
     // 等级
     public static function levelList()
     {
         return Level::query()->get()->sortBy('level');
+    }
+
+    // 生成用户的订阅码
+    public static function makeSubscribeCode()
+    {
+        $code = makeRandStr(5);
+        if (UserSubscribe::query()->where('code', $code)->exists()) {
+            $code = self::makeSubscribeCode();
+        }
+
+        return $code;
     }
 
     /**
@@ -129,33 +141,9 @@ class Helpers
         $log->content = $content;
         $log->status = $status;
         $log->error = $error;
-        $log->created_at = date('Y-m-d H:i:s');
+        $log->save();
 
-        return $log->save();
-    }
-
-    /**
-     * 添加serverChan投递日志
-     *
-     * @param string $title   标题
-     * @param string $content 内容
-     * @param int    $status  投递状态
-     * @param string $error   投递失败时记录的异常信息
-     *
-     * @return int
-     */
-    public static function addServerChanLog($title, $content, $status = 1, $error = '')
-    {
-        $log = new EmailLog();
-        $log->type = 2;
-        $log->address = 'admin';
-        $log->title = $title;
-        $log->content = $content;
-        $log->status = $status;
-        $log->error = $error;
-        $log->created_at = date('Y-m-d H:i:s');
-
-        return $log->save();
+        return $log->id;
     }
 
     /**

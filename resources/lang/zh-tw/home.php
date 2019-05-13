@@ -26,6 +26,7 @@ return [
 
     // 首页
     'ratio_tips'                      => '推薦使用支持節點訂閱功能的用戶端，通過訂閱功能可以在用戶端快速同步節點資訊。',
+    'my_node_list'                    => '節點清單',
     'subscribe_button'                => '獲取訂閱地址',
     'account_info'                    => '帳號資訊',
     'account_level'                   => '等級',
@@ -112,7 +113,7 @@ return [
     'invite_code_make'                => '生成邀請碼',
     'invite_code_button'              => '生成',
     'invite_code_tips1'               => '可生成',
-    'invite_code_tips2'               => '枚邀請碼，7日內有效',
+    'invite_code_tips2'               => '枚邀請碼，:days 日內有效',
     'invite_code_my_codes'            => '我的邀請碼',
     'invite_code_table_name'          => '邀請碼',
     'invite_code_table_date'          => '有效期',

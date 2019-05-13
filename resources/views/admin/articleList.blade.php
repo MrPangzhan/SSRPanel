@@ -43,17 +43,23 @@
                                     @foreach($list as $vo)
                                         <tr class="odd gradeX">
                                             <td> {{$vo->id}} </td>
-                                            <td> {{$vo->type == '1' ? '文章' : '公告'}} </td>
+                                            @if ($vo->type == '1')
+                                                <td> 文章 </td>
+                                            @elseif ($vo->type == '2')
+                                                <td> 公告 </td>
+                                            @elseif ($vo->type == '3')
+                                                <td> 购买说明 </td>
+                                            @elseif ($vo->type == '4')
+                                                <td> 使用教程 </td>
+                                            @else
+                                                <td> 未知 </td>
+                                            @endif
                                             <td> <a href="{{url('article?id=' . $vo->id)}}" target="_blank"> {{str_limit($vo->title, 80)}} </a> </td>
                                             <td> {{$vo->sort}} </td>
                                             <td> {{$vo->created_at}} </td>
                                             <td>
-                                                <button type="button" class="btn btn-sm blue btn-outline" onclick="editArticle('{{$vo->id}}')">
-                                                    <i class="fa fa-pencil"></i>
-                                                </button>
-                                                <button type="button" class="btn btn-sm red btn-outline" onclick="delArticle('{{$vo->id}}')">
-                                                    <i class="fa fa-trash"></i>
-                                                </button>
+                                                <button type="button" class="btn btn-sm blue btn-outline" onclick="editArticle('{{$vo->id}}')"> 编辑 </button>
+                                                <button type="button" class="btn btn-sm red btn-outline" onclick="delArticle('{{$vo->id}}')"> 删除 </button>
                                             </td>
                                         </tr>
                                     @endforeach

@@ -26,6 +26,7 @@ return [
 
     // 首页
     'ratio_tips'                      => '지원 기능의 구독 기능을 사용하는 클라이언트 사용, 구독 기능으로 클라이언트 동기화 정보를 입력할 수 있습니다.',
+    'my_node_list'                    => '노드 목록',
     'subscribe_button'                => 'RSS구도주소 보기',
     'account_info'                    => '유저정보',
     'account_level'                   => '레벨',
@@ -110,7 +111,7 @@ return [
     'invite_code_make'                => '초청코드생성',
     'invite_code_button'              => '생성',
     'invite_code_tips1'               => '생성가능',
-    'invite_code_tips2'               => '개 총청코드, 7 일내에 유효하다.',
+    'invite_code_tips2'               => '개 총청코드, :days 일내에 유효하다.',
     'invite_code_my_codes'            => '나의 초청코드',
     'invite_code_table_name'          => '초청코드',
     'invite_code_table_date'          => '유효기간',

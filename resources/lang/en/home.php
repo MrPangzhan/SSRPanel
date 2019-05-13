@@ -26,6 +26,7 @@ return [
 
     // 首页
     'ratio_tips'                      => 'Recommends the use of support node subscription function of the client, through subscription function can quickly synchronize node information in the client.',
+    'my_node_list'                    => 'Node List',
     'subscribe_button'                => 'Subscribe',
     'account_info'                    => 'Account Info',
     'account_level'                   => 'Level',
@@ -112,7 +113,7 @@ return [
     'invite_code_make'                => 'Generate Invite Code',
     'invite_code_button'              => 'Create',
     'invite_code_tips1'               => 'You can generate',
-    'invite_code_tips2'               => 'invite codes, effective within 7 days',
+    'invite_code_tips2'               => 'invite codes, effective within :days days',
     'invite_code_my_codes'            => 'My Invite Codes',
     'invite_code_table_name'          => 'Codes',
     'invite_code_table_date'          => 'Overdue Date',

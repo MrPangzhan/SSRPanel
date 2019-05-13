@@ -5,9 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Models\ReferralLog;
 use App\Http\Models\SensitiveWords;
 use App\Http\Models\UserBalanceLog;
-use App\Http\Models\UserScoreLog;
-use App\Http\Models\UserSubscribe;
-use App\Http\Models\UserTrafficModifyLog;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -29,15 +26,10 @@ class Controller extends BaseController
         exit(createGuid());
     }
 
-    // 生成订阅地址的唯一码
-    public function makeSubscribeCode()
+    // 生成网站安全码
+    public function makeSecurityCode()
     {
-        $code = makeRandStr(5);
-        if (UserSubscribe::query()->where('code', $code)->exists()) {
-            $code = $this->makeSubscribeCode();
-        }
-
-        return $code;
+        exit(strtolower(makeRandStr(8)));
     }
 
     // 类似Linux中的tail命令
@@ -136,30 +128,6 @@ class Controller extends BaseController
         $log->amount = $amount;
         $log->ref_amount = $refAmount;
         $log->status = 0;
-
-        return $log->save();
-    }
-
-    /**
-     * 添加积分日志
-     *
-     * @param int    $userId 用户ID
-     * @param int    $before 记录前余额
-     * @param int    $after  记录后余额
-     * @param int    $score  发生值
-     * @param string $desc   描述
-     *
-     * @return int
-     */
-    public function addUserScoreLog($userId, $before, $after, $score, $desc = '')
-    {
-        $log = new UserScoreLog();
-        $log->user_id = $userId;
-        $log->before = $before;
-        $log->after = $after;
-        $log->score = $score;
-        $log->desc = $desc;
-        $log->created_at = date('Y-m-d H:i:s');
 
         return $log->save();
     }

@@ -102,6 +102,25 @@ if (!function_exists('formatBytes')) {
     }
 }
 
+// 秒转时间
+if (!function_exists('seconds2time')) {
+    function seconds2time($seconds)
+    {
+        $day = floor($seconds / (3600 * 24));
+        $hour = floor(($seconds % (3600 * 24)) / 3600);
+        $minute = floor((($seconds % (3600 * 24)) % 3600) / 60);
+        if ($day > 0) {
+            return $day . '天' . $hour . '小时' . $minute . '分';
+        } else {
+            if ($hour != 0) {
+                return $hour . '小时' . $minute . '分';
+            } else {
+                return $minute . '分';
+            }
+        }
+    }
+}
+
 // 获取访客真实IP
 if (!function_exists('getClientIP')) {
     function getClientIP()
@@ -125,6 +144,7 @@ if (!function_exists('getClientIP')) {
                 $ip = 'unknown';
             }
         } else {
+            // 绕过CDN获取真实访客IP
             if (getenv('HTTP_X_FORWARDED_FOR')) {
                 $ip = getenv('HTTP_X_FORWARDED_FOR');
             } elseif (getenv('HTTP_CLIENT_ip')) {
@@ -156,7 +176,20 @@ if (!function_exists('getIPv6')) {
      *     "country_code3": "CHN",
      *     "continent_code": "AS",
      *     "country_code": "CN"
-     *  }
+     * }
+     *
+     * {
+     *     "longitude": 105,
+     *     "latitude": 35,
+     *     "area_code": "0",
+     *     "dma_code": "0",
+     *     "organization": "AS9808 Guangdong Mobile Communication Co.Ltd.",
+     *     "country": "China",
+     *     "ip": "2409:8a74:487:1f30:5178:e5a5:1f36:3525",
+     *     "country_code3": "CHN",
+     *     "continent_code": "AS",
+     *     "country_code": "CN"
+     * }
      */
     function getIPv6($ip)
     {
@@ -165,9 +198,7 @@ if (!function_exists('getIPv6')) {
         try {
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 500);
-            // 为保证第三方服务器与微信服务器之间数据传输的安全性，所有微信接口采用https方式调用，必须使用下面2行代码打开ssl安全校验。
-            // 如果在部署过程中代码在此处验证失败，请到 http://curl.haxx.se/ca/cacert.pem 下载新的证书判别文件。
+            curl_setopt($ch, CURLOPT_TIMEOUT, 10);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
             curl_setopt($ch, CURLOPT_URL, $url);
@@ -178,7 +209,7 @@ if (!function_exists('getIPv6')) {
 
             $result = json_decode($result, true);
             if (!is_array($result) || isset($result['code'])) {
-                throw new Exception('解析IPv6信息异常：' . $ip);
+                throw new Exception('解析IPv6异常：' . $ip);
             }
 
             return $result;
@@ -204,5 +235,31 @@ if (!function_exists('createGuid')) {
             . substr($charid, 20, 12);
 
         return strtolower($uuid);
+    }
+}
+
+// 过滤emoji表情
+if (!function_exists('filterEmoji')) {
+    function filterEmoji($str)
+    {
+        $str = preg_replace_callback('/./u',
+            function (array $match) {
+                return strlen($match[0]) >= 4 ? '' : $match[0];
+            },
+            $str);
+
+        return $str;
+    }
+}
+
+// 验证手机号是否正确
+if (!function_exists('isMobile')) {
+    function isMobile($mobile)
+    {
+        if (!is_numeric($mobile)) {
+            return false;
+        }
+
+        return preg_match('#^13[\d]{9}$|^14[5,7]{1}\d{8}$|^15[^4]{1}\d{8}$|^17[0,6,7,8]{1}\d{8}$|^18[\d]{9}$#', $mobile) ? true : false;
     }
 }

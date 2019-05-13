@@ -17,7 +17,7 @@
                         <div class="portlet-body">
                             <div class="alert alert-info">
                                 <i class="fa fa-warning"></i>
-                                每次仅生成 <strong> 5 </strong> 枚邀请码，7日内有效
+                                每次仅生成 <strong> 10 </strong> 枚邀请码，{{\App\Components\Helpers::systemConfig()['admin_invite_days']}}天内有效
                             </div>
                             <button type="submit" class="btn blue" onclick="makeInvite()"> 生 成 </button>
                         </div>
@@ -65,9 +65,9 @@
                                                     <td> {{$invite->dateline}} </td>
                                                     <td> 
                                                         @if($invite->uid == '0')
-                                                            {{'系统生成'}}
+                                                            系统生成
                                                         @else
-                                                            {{empty($invite->generator) ? '账号已删除' : $invite->generator->username}}
+                                                            {{empty($invite->generator) ? '【账号已删除】' : $invite->generator->username}}
                                                         @endif
                                                     </td>
                                                     <td>

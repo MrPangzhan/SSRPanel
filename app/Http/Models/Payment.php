@@ -2,6 +2,7 @@
 
 namespace App\Http\Models;
 
+use Auth;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -9,23 +10,25 @@ use Illuminate\Database\Eloquent\Model;
  * Class Payment
  *
  * @package App\Http\Models
- * @property mixed $amount
- * @property-read mixed $pay_way_label
- * @property-read mixed $status_label
- * @property-read \App\Http\Models\Order $order
- * @property-read \App\Http\Models\User $user
  * @mixin \Eloquent
  */
 class Payment extends Model
 {
     protected $table = 'payment';
+    protected $primaryKey = 'id';
+    protected $appends = ['status_label'];
 
-    public function user()
+    function scopeUid($query)
+    {
+        return $query->where('user_id', Auth::user()->id);
+    }
+
+    function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
-    public function order()
+    function order()
     {
         return $this->belongsTo(Order::class, 'oid', 'oid');
     }
@@ -41,7 +44,7 @@ class Payment extends Model
     }
 
     // 订单状态
-    public function getStatusLabelAttribute()
+    function getStatusLabelAttribute()
     {
         switch ($this->attributes['status']) {
             case -1:
@@ -53,14 +56,13 @@ class Payment extends Model
             case 0:
             default:
                 $status_label = '等待支付';
-                break;
         }
 
         return $status_label;
     }
 
     // 支付方式
-    public function getPayWayLabelAttribute()
+    function getPayWayLabelAttribute()
     {
         switch ($this->attributes['pay_way']) {
             case 1:
@@ -69,7 +71,6 @@ class Payment extends Model
             case 2:
             default:
                 $pay_way_label = '支付宝';
-                break;
         }
 
         return $pay_way_label;

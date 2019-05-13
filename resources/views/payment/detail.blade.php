@@ -8,7 +8,7 @@
         <div class="portlet light bordered">
             <div class="portlet-body">
                 <div class="alert alert-info" style="text-align: center;">
-                    请使用<strong style="color:red;">支付宝、微信</strong>扫描如下二维码
+                    请使用<strong style="color:red;">支付宝@if(\App\Components\Helpers::systemConfig()['is_youzan'])、微信@endif</strong>扫描如下二维码
                 </div>
                 <div class="row" style="text-align: center; font-size: 1.05em;">
                     <div class="col-md-12">
@@ -54,11 +54,16 @@
     <script type="text/javascript">
         // 每800毫秒查询一次订单状态
         $(document).ready(function(){
+            // 支付宝直接跳转支付
+            @if(\App\Components\Helpers::systemConfig()['is_alipay'])
+                document.body.innerHTML += unescapeHTML("{{$payment->qr_code}}");
+                document.forms['alipaysubmit'].submit();
+            @endif
             setInterval("getStatus()", 800);
         });
 
         // 检查支付单状态
-        function getStatus () {
+        function getStatus() {
             var sn = '{{$payment->sn}}';
 
             $.get("{{url('payment/getStatus')}}", {sn:sn}, function (ret) {
@@ -83,6 +88,12 @@
             x.setAttribute("width", "75%");
         } else {
             x.setAttribute("height", "75%");
+        }
+
+        // 还原html脚本 < > & " '
+        function unescapeHTML(str) {
+            str = "" + str;
+            return str.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#039;/g, "'");
         }
     </script>
 @endsection

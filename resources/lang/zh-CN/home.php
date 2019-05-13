@@ -26,6 +26,7 @@ return [
 
     // 首页
     'ratio_tips'                      => '推荐使用支持节点订阅功能的客户端，通过订阅功能可以在客户端快速同步节点信息。',
+    'my_node_list'                    => '节点列表',
     'subscribe_button'                => '获取订阅地址',
     'account_info'                    => '账户信息',
     'account_level'                   => '等级',
@@ -39,7 +40,7 @@ return [
     'account_total_traffic'           => '共计',
     'account_usage_traffic'           => '已使用',
     'account_reset_notice'            => '每月 :reset_day 日重置',
-    'account_login_log'               => '登陆日志',
+    'account_login_log'               => '登入日志',
     'article_title'                   => '文章',
     'recharge'                        => '充值',
     'enabled'                         => '正常',
@@ -112,7 +113,7 @@ return [
     'invite_code_make'                => '生成邀请码',
     'invite_code_button'              => '生成',
     'invite_code_tips1'               => '可生成',
-    'invite_code_tips2'               => '枚邀请码，7日内有效',
+    'invite_code_tips2'               => '枚邀请码，:days 日内有效',
     'invite_code_my_codes'            => '我的邀请码',
     'invite_code_table_name'          => '邀请码',
     'invite_code_table_date'          => '有效期',

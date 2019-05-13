@@ -10,6 +10,7 @@ return [
     | This value is the name of your application. This value is used when the
     | framework needs to place the application's name in a notification or
     | any other location as required by the application or its packages.
+    |
     */
 
     'name' => env('APP_NAME', 'Laravel'),
@@ -109,25 +110,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Logging Configuration
-    |--------------------------------------------------------------------------
-    |
-    | Here you may configure the log settings for your application. Out of
-    | the box, Laravel uses the Monolog PHP logging library. This gives
-    | you a variety of powerful log handlers / formatters to utilize.
-    |
-    | Available Settings: "single", "daily", "syslog", "errorlog"
-    |
-    */
-
-    'log' => env('APP_LOG', 'single'),
-
-    'log_level' => env('APP_LOG_LEVEL', 'debug'),
-
-    'log_max_files' => 30,
-
-    /*
-    |--------------------------------------------------------------------------
     | Autoloaded Service Providers
     |--------------------------------------------------------------------------
     |
@@ -161,14 +143,17 @@ return [
         Illuminate\Redis\RedisServiceProvider::class,
         Illuminate\Auth\Passwords\PasswordResetServiceProvider::class,
         Illuminate\Session\SessionServiceProvider::class,
-        //Illuminate\Translation\TranslationServiceProvider::class, // 弃用自带多国语言包功能
+        // Illuminate\Translation\TranslationServiceProvider::class, // 弃用自带多国语言包功能
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
-
+        
+        
         /*
-         * Package Service Providers...
-         */
-        Laravel\Tinker\TinkerServiceProvider::class,
+        * Package Service Providers...
+        */
+        Misechow\Geetest\GeetestServiceProvider::class,  // Geetest Service
+        Misechow\NoCaptcha\NoCaptchaServiceProvider::class, // Google reCAPTCHA Service
+        Overtrue\LaravelLang\TranslationServiceProvider::class, // 多国语言包功能
 
         /*
          * Application Service Providers...
@@ -178,13 +163,6 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
-
-        Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class,
-        Mews\Captcha\CaptchaServiceProvider::class,
-        Jenssegers\Agent\AgentServiceProvider::class,
-        Overtrue\LaravelLang\TranslationServiceProvider::class,
-        Mews\Purifier\PurifierServiceProvider::class,
-        Rap2hpoutre\LaravelLogViewer\LaravelLogViewerServiceProvider::class,
 
     ],
 
@@ -236,7 +214,8 @@ return [
         'Captcha'      => Mews\Captcha\Facades\Captcha::class,
         'Agent'        => Jenssegers\Agent\Facades\Agent::class,
         'Purifier'     => Mews\Purifier\Facades\Purifier::class,
-
+        'Geetest'      => Misechow\Geetest\Geetest::class,
+        'NoCaptcha' => Misechow\NoCaptcha\Facades\NoCaptcha::class,
     ],
 
 ];
